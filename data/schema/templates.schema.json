@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Template index",
+  "description": "The built-in templates, in the order the app lists them. Each id names a file, data/templates/<id>.json.",
+  "type": "array",
+  "items": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Id of a template file."},
+  "uniqueItems": true
+}

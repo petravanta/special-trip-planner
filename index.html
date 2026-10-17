@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Special Trip Planner</title>
+<meta name="description" content="Plan a higher-stakes trip (a surgery, a hike, a festival, a conference) from a template written by people who have done it before.">
+<meta name="theme-color" content="#ffffff">
+<script>try{var t=localStorage.getItem('petravanta.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ===== Shared look: petravanta's apps =====
+   Canonical copy of the tokens, type and components used by Fitness Coach and Skating Mentor (and this hub).
+   Apps currently inline this block between "Shared look" and "end shared look"; update both when it changes.
+   Each app only overrides the --accent values after this block. */
+:root{
+  --bg:#eef2f4; --surface:#ffffff; --sunk:#e3e9ec; --line:#cdd6db; --ink:#14212a; --muted:#566771; --faint:#8a99a2;
+  --lv-new:#9aa8b0; --lv-learn:#c07a00; --lv-dev:#2f6fd0; --lv-conf:#11897a; --lv-solid:#0c5e3e;
+  --lv-learn-bg:#fbefd9; --lv-dev-bg:#e1ebfa; --lv-conf-bg:#d9f1ec; --lv-solid-bg:#d5eadf;
+  --danger:#b3261e; --danger-soft:#fbe3e1;
+  --f-display:"Unbounded","Arial Rounded MT Bold",system-ui,sans-serif;
+  --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f161b; --surface:#172129; --sunk:#111a20; --line:#2a3842; --ink:#e4ecf0; --muted:#9fb0ba; --faint:#6b7d88;
+  --lv-new:#64757f; --lv-learn:#e6a33a; --lv-dev:#6ea0f0; --lv-conf:#3cc3ad; --lv-solid:#6fd39a;
+  --lv-learn-bg:#3a2a10; --lv-dev-bg:#182a45; --lv-conf-bg:#0f3530; --lv-solid-bg:#143224;
+  --danger:#ff8a80; --danger-soft:#3d1c1a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f161b; --surface:#172129; --sunk:#111a20; --line:#2a3842; --ink:#e4ecf0; --muted:#9fb0ba; --faint:#6b7d88;
+  --lv-new:#64757f; --lv-learn:#e6a33a; --lv-dev:#6ea0f0; --lv-conf:#3cc3ad; --lv-solid:#6fd39a;
+  --lv-learn-bg:#3a2a10; --lv-dev-bg:#182a45; --lv-conf-bg:#0f3530; --lv-solid-bg:#143224;
+  --danger:#ff8a80; --danger-soft:#3d1c1a; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar{display:flex;align-items:center;gap:16px;padding-block:12px 0;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.brand svg{width:26px;height:26px;flex:none}
+.save-state{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--f-mono)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;padding-top:8px;scrollbar-width:none}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:8px 12px 9px;font-weight:600;color:var(--muted);white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+main{padding-block:20px 80px}
+h2{font-family:var(--f-display);font-weight:500;font-size:20px;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:none}
+.btn.danger{color:var(--danger)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn.big{padding:12px 22px;font-size:16px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+label.field{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+select,input[type=text],input[type=number],textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:15px;text-transform:none;letter-spacing:0;font-weight:500;min-width:0}
+textarea{resize:vertical}
+.ctx{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:end}
+@media (max-width:720px){.ctx{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ctx-note{font-size:13px;color:var(--muted);margin-top:10px}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;white-space:nowrap;background:var(--sunk);color:var(--muted)}
+.pill.l1{background:var(--lv-learn-bg);color:var(--lv-learn)}
+.pill.l2{background:var(--lv-dev-bg);color:var(--lv-dev)}
+.pill.l3{background:var(--lv-conf-bg);color:var(--lv-conf)}
+.pill.l4{background:var(--lv-solid-bg);color:var(--lv-solid)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:720px){.two{grid-template-columns:minmax(0,1fr)}}
+.banner{background:var(--accent-soft);border-radius:var(--r);padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.banner p{flex:1 1 260px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:620px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat b{display:block;font-family:var(--f-mono);font-size:24px;font-weight:500}
+.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.meter{height:8px;border-radius:4px;background:var(--sunk);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:4px;background:var(--accent)}
+.scrim{position:fixed;inset:0;background:rgba(10,16,20,.35);z-index:40}
+.drawer{position:fixed;z-index:41;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--surface);border-left:1px solid var(--line);overflow-y:auto;
+  padding:calc(env(safe-area-inset-top,0px) + 18px) max(18px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) 18px;display:flex;flex-direction:column;gap:16px}
+@media (max-width:640px){.drawer{top:auto;left:0;width:100%;max-height:86vh;border-left:0;border-top:1px solid var(--line);border-radius:16px 16px 0 0;padding-left:max(18px,env(safe-area-inset-left,0px))}}
+.drawer .x{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:max(12px,env(safe-area-inset-right,0px));background:var(--sunk);border:0;border-radius:999px;width:32px;height:32px;font-size:18px;line-height:1}
+@media (max-width:640px){.drawer .x{top:12px}}
+.drawer h2{padding-right:40px}
+.drawer ul,.cues{margin:0;padding-left:18px}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.checks label{display:inline-flex;align-items:center;gap:5px;font-size:13px;border:1px solid var(--line);border-radius:6px;padding:3px 8px;background:var(--sunk)}
+.entry{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:8px 0;border-top:1px solid var(--line)}
+.entry .meta{font-size:12px;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 18px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;font-weight:600;z-index:60;max-width:calc(100% - 32px)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.4}}}
+/* ===== end shared look ===== */
+/* Special Trip Planner accent: blue */
+:root{--accent:#1d6fb8;--accent-ink:#ffffff;--accent-soft:#e0ecf8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--accent:#6cb4ff;--accent-ink:#06182b;--accent-soft:#132a42}}
+:root[data-theme="dark"]{--accent:#6cb4ff;--accent-ink:#06182b;--accent-soft:#132a42}
+
+.plan-pick{display:flex;align-items:center;gap:8px;margin-left:auto}
+.plan-pick select{max-width:52vw}
+.snapshot{font-size:13px;color:var(--muted);border-left:3px solid var(--accent);padding:4px 0 4px 10px}
+.item{padding:12px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.item:first-of-type{border-top:0}
+.item-head{display:flex;gap:8px;align-items:flex-start}
+.item-head .t{flex:1;font-weight:600}
+.item-head .tools{display:flex;gap:4px;flex:none}
+.icon-btn{background:none;border:1px solid transparent;border-radius:8px;color:var(--muted);padding:2px 6px;font-size:13px}
+.icon-btn:hover{border-color:var(--line);color:var(--ink)}
+.why{font-size:14px;background:var(--sunk);border-radius:8px;padding:8px 10px}
+.why b{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:6px}
+.why .src{font-size:12px;color:var(--muted)}
+.why .src a{color:inherit}
+.nudge{font-size:13px;color:var(--lv-learn)}
+.when{font-size:13px;color:var(--muted)}
+.pill.must{background:var(--danger-soft);color:var(--danger)}
+.pill.should{background:var(--lv-learn-bg);color:var(--lv-learn)}
+.pill.tip,.pill.optional{background:var(--sunk);color:var(--muted)}
+.pill.recommended{background:var(--lv-dev-bg);color:var(--lv-dev)}
+.pill.basis{background:var(--accent-soft);color:var(--accent)}
+.pill.private{background:var(--sunk);color:var(--muted);border:1px dashed var(--line)}
+.phase-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.phase-now{outline:2px solid var(--accent);outline-offset:-1px}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
+.check:first-of-type{border-top:0}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:none}
+.check.done .t{text-decoration:line-through;color:var(--muted)}
+.check .t{font-weight:600}
+.daybar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.daybar h2{flex:1}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:8px}
+.card .grow{flex:1}
+.hero{display:flex;flex-direction:column;gap:8px;padding:8px 0 4px}
+.hero p{max-width:62ch}
+.status-sel{min-width:110px}
+.form{display:flex;flex-direction:column;gap:12px}
+.form .inline{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.form .inline > *{flex:1 1 120px}
+.form .inline input[type=number]{width:80px}
+.form label.cb{display:flex;gap:8px;align-items:center;font-size:14px}
+input[type=date],input[type=time],input[type=email],input[type=tel],input[type=url]{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:15px;min-width:0}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;overflow-wrap:anywhere}
+pre.json{background:var(--sunk);border-radius:8px;padding:10px;font-size:12px;max-height:260px;overflow:auto;font-family:var(--f-mono)}
+.err{color:var(--danger);font-size:14px}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <a data-hub-link href="https://petravanta.github.io/general/">All apps</a>
+      <div class="brand">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 26 13 9l5 9 3-5 7 13z" fill="var(--accent)"/><circle cx="23" cy="7" r="3" fill="var(--ink)"/></svg>
+        Special Trip Planner
+      </div>
+      <div class="plan-pick" id="planPick"></div>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Views"></nav>
+  </div>
+</header>
+<main class="wrap" id="main"></main>
+<div id="layer"></div>
+<input type="file" id="fileIn" accept="application/json,.json" hidden>
+<script>
+'use strict';
+/* Special Trip Planner. Templates hold what experienced people know about a kind of trip; a plan is a private
+   copy of one (its "knowledge") plus private tracking that never leaves the person's own storage.
+   User data follows the "User data" section of petravanta/general STANDARDS.md. */
+
+const STORE_KEY = 'specialTripPlanner.data';
+const FORMAT = 'special-trip-template';
+const LISTS = ['rules', 'meds', 'packing', 'food', 'contacts', 'logistics', 'daily'];
+const PRIVATE_LISTS = ['regimens', 'doses', 'checks', 'packStatus', 'bookings', 'people', 'journal'];
+const TABS = [
+  ['today', 'Today'], ['timeline', 'Timeline & rules'], ['meds', 'Meds & health'], ['packing', 'Packing'],
+  ['food', 'Food'], ['contacts', 'Contacts & places'], ['logistics', 'Logistics'], ['journal', 'Journal'],
+  ['library', 'Templates'], ['settings', 'Settings']
+];
+const LABELS = {
+  kind: {do: 'Do', avoid: 'Avoid', limit: 'Limit'},
+  strength: {must: 'Must', should: 'Should', tip: 'Tip'},
+  need: {must: 'Must have', recommended: 'Recommended', optional: 'Optional'},
+  how: {bring: 'Bring from home', 'buy-before': 'Buy before', 'buy-there': 'Buy there', 'rent-there': 'Rent there', provided: 'Provided'},
+  basis: {official: 'Official', evidence: 'Evidence', experience: 'Experience'},
+  status: {need: 'Still need', ordered: 'Ordered', have: 'Have it', packed: 'Packed'},
+  repeat: {once: 'Once', daily: 'Daily', 'twice-daily': 'Twice a day', 'three-times-daily': 'Three times a day', weekly: 'Weekly'},
+  tripType: {medical: 'Medical stay', hiking: 'Hiking', festival: 'Festival', conference: 'Conference', other: 'Other'},
+  dailyKind: {activity: 'Activity', appointment: 'Appointment', med: 'Med', meal: 'Meal', task: 'Task'},
+  medCat: {pain: 'Pain', antibiotic: 'Antibiotic', 'blood-thinner': 'Blood thinner', bowel: 'Bowel', nausea: 'Nausea', sleep: 'Sleep', allergy: 'Allergy', altitude: 'Altitude', skin: 'Skin', supplement: 'Supplement', other: 'Other'},
+  rx: {prescription: 'Prescription', 'over-the-counter': 'Over the counter'},
+  contactKind: {person: 'Person', organization: 'Organization', place: 'Place'},
+  logKind: {travel: 'Travel', lodging: 'Lodging', ticket: 'Ticket', permit: 'Permit', transport: 'Transport', insurance: 'Insurance', other: 'Other'}
+};
+const SLOTS = {once: 1, daily: 1, 'twice-daily': 2, 'three-times-daily': 3, weekly: 1};
+const SLOT_NAMES = {1: [''], 2: ['Morning', 'Evening'], 3: ['Morning', 'Midday', 'Evening']};
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const nowIso = () => new Date().toISOString();
+const rid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+const clone = o => JSON.parse(JSON.stringify(o));
+const slug = s => (String(s || 'item').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'item');
+const newItemId = s => `${slug(s)}-${Math.random().toString(36).slice(2, 6)}`;
+const pad = n => String(n).padStart(2, '0');
+const dayStr = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseDay = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const endOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+const fmtDay = d => d.toLocaleDateString(undefined, {weekday: 'short', day: 'numeric', month: 'short'});
+const fmtLong = d => d.toLocaleDateString(undefined, {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+const fmtTime = d => d.toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'});
+const todayStr = () => dayStr(new Date());
+const daysBetween = (a, b) => Math.round((startOfDay(b) - startOfDay(a)) / 864e5);
+
+/* ---------- storage ---------- */
+function emptyState() {
+  const s = {version: 1, settings: {currentPlan: null, updatedAt: ''}, templates: [], plans: [], deleted: []};
+  for (const k of PRIVATE_LISTS) s[k] = [];
+  return s;
+}
+function fixState(j) {
+  const s = emptyState();
+  if (!j || typeof j !== 'object') return s;
+  if (j.settings && typeof j.settings === 'object') Object.assign(s.settings, j.settings);
+  for (const k of ['templates', 'plans', 'deleted', ...PRIVATE_LISTS]) if (Array.isArray(j[k])) s[k] = j[k].filter(Boolean);
+  return s;
+}
+let state = emptyState();
+let canStore = true;
+try { state = fixState(JSON.parse(localStorage.getItem(STORE_KEY) || 'null')); } catch (e) { canStore = false; }
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { if (canStore) toast('Could not save in this browser'); canStore = false; }
+}
+function touch(rec) { rec.u = nowIso(); return rec; }
+function touchSettings() { state.settings.updatedAt = nowIso(); }
+function dropRecord(list, id) { state[list] = state[list].filter(r => r.id !== id); state.deleted.push(id); }
+
+/* Merge two copies, as STANDARDS.md "User data" describes: records by id with the newer `u` winning,
+   deletions carried by the `deleted` list, settings by `updatedAt`. */
+function mergeStates(a, b) {
+  const out = emptyState();
+  const del = new Set([...(a.deleted || []), ...(b.deleted || [])]);
+  for (const k of ['templates', 'plans', ...PRIVATE_LISTS]) {
+    const by = new Map();
+    for (const r of [...(a[k] || []), ...(b[k] || [])]) {
+      if (!r || !r.id || del.has(r.id)) continue;
+      const have = by.get(r.id);
+      if (!have || (r.u || '') > (have.u || '')) by.set(r.id, r);
+    }
+    out[k] = [...by.values()];
+  }
+  out.deleted = [...del];
+  out.settings = {...emptyState().settings, ...((a.settings?.updatedAt || '') >= (b.settings?.updatedAt || '') ? a.settings : b.settings)};
+  return out;
+}
+
+/* ---------- built-in templates ---------- */
+let builtIns = [];
+let loaded = false;
+let loadError = '';
+async function loadBuiltIns() {
+  try {
+    const ids = await (await fetch('data/templates.json')).json();
+    builtIns = (await Promise.all(ids.map(id => fetch(`data/templates/${id}.json`).then(r => r.json())))).filter(Boolean);
+  } catch (e) { loadError = 'The built-in templates could not load. You can still import a template file.'; }
+  loaded = true;
+}
+function allTemplates() {
+  const mine = state.templates.map(r => ({...r.template, _source: 'mine', _rec: r.id}));
+  const ids = new Set(mine.map(t => t.id));
+  return [...mine, ...builtIns.filter(t => !ids.has(t.id)).map(t => ({...t, _source: 'built-in'}))];
+}
+
+/* ---------- checking a template (same rules as scripts/check-data.js) ---------- */
+function checkTemplate(t) {
+  const errs = [];
+  if (!t || typeof t !== 'object') return ['This file is not a template.'];
+  for (const f of ['id', 'name', 'tripType', 'summary', 'version', 'asOf', 'anchors', 'phases']) if (t[f] == null || t[f] === '') errs.push(`It has no "${f}".`);
+  if (t.id && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(t.id)) errs.push('Its id may only use lowercase letters, digits and hyphens.');
+  if (errs.length) return errs;
+  const anchors = new Map((t.anchors || []).map(a => [a.id, a]));
+  const ids = {};
+  for (const l of ['phases', ...LISTS, 'sources']) {
+    ids[l] = new Set();
+    for (const it of t[l] || []) { if (ids[l].has(it.id)) errs.push(`${l}: id "${it.id}" repeats.`); ids[l].add(it.id); }
+  }
+  const aref = (r, at) => { const [id, edge] = String(r).split(':'); const a = anchors.get(id); if (!a) errs.push(`${at}: anchor "${id}" doesn't exist.`); else if (edge && a.kind !== 'range') errs.push(`${at}: "${r}" needs a range anchor.`); };
+  const off = (o, at) => { if (o != null && !/^[+-]?[0-9]+[hdw]$/.test(o)) errs.push(`${at}: "${o}" is not an offset like -14d.`); };
+  const when = (w, at) => {
+    if (!w) return;
+    if (w.phase) { if (!ids.phases.has(w.phase)) errs.push(`${at}: phase "${w.phase}" doesn't exist.`); return; }
+    aref(w.anchor, at); off(w.from, at); off(w.to, at); if (w.toAnchor) aref(w.toAnchor, at);
+  };
+  for (const p of t.phases || []) when(p.when, `phases/${p.id}`);
+  for (const l of LISTS) for (const it of t[l] || []) {
+    const at = `${l}/${it.id}`;
+    when(it.when, at);
+    for (const s of it.why?.sources || []) if (!ids.sources.has(s)) errs.push(`${at}: source "${s}" isn't listed.`);
+    const bw = it.obtain?.byWhen || it.byWhen; if (bw) { aref(bw.anchor, at); off(bw.at, at); }
+    if (it.medId && !ids.meds.has(it.medId)) errs.push(`${at}: med "${it.medId}" doesn't exist.`);
+    if (it.contactId && !ids.contacts.has(it.contactId)) errs.push(`${at}: contact "${it.contactId}" doesn't exist.`);
+  }
+  return errs;
+}
+
+/* ---------- plans and time ---------- */
+let view = 'today';
+let viewDay = todayStr();
+let showHidden = false;
+function currentPlan() { return state.plans.find(p => p.id === state.settings.currentPlan) || state.plans[0] || null; }
+const K = () => currentPlan().knowledge;
+
+function anchorOf(plan, ref) {
+  const [id, edge] = String(ref).split(':');
+  const a = (plan.knowledge.anchors || []).find(x => x.id === id);
+  return {a, edge, id};
+}
+function anchorMoment(plan, ref) {
+  const {a, edge, id} = anchorOf(plan, ref);
+  const d = plan.anchorDates?.[id];
+  if (!a || !d) return null;
+  const date = a.kind === 'range' ? (edge === 'end' ? d.end || d.start : d.start) : d.date;
+  if (!date) return null;
+  const day = parseDay(date);
+  const time = a.kind === 'day' && d.time ? d.time : null;
+  return {day, time};
+}
+function parseOffset(o) { const m = /^([+-]?)(\d+)([hdw])$/.exec(o || ''); if (!m) return null; return {n: (m[1] === '-' ? -1 : 1) * Number(m[2]), unit: m[3]}; }
+function applyOffset(base, o) {
+  const off = parseOffset(o);
+  if (!base || !off) return null;
+  if (off.unit === 'h') {
+    const [hh, mm] = (base.time || '00:00').split(':').map(Number);
+    const t = new Date(base.day); t.setHours(hh, mm, 0, 0); t.setHours(t.getHours() + off.n);
+    return {at: t, hours: true};
+  }
+  return {at: addDays(base.day, off.unit === 'w' ? off.n * 7 : off.n), hours: false};
+}
+function resolveWhen(plan, w, depth = 0) {
+  if (!w || depth > 3) return null;
+  if (w.phase) { const ph = (plan.knowledge.phases || []).find(p => p.id === w.phase); return ph ? resolveWhen(plan, ph.when, depth + 1) : null; }
+  const from = applyOffset(anchorMoment(plan, w.anchor), w.from);
+  if (!from) return null;
+  const to = w.to ? applyOffset(anchorMoment(plan, w.toAnchor || w.anchor), w.to) : from;
+  if (!to) return null;
+  return {start: from.hours ? from.at : startOfDay(from.at), end: to.hours ? to.at : endOfDay(to.at), hours: from.hours || to.hours};
+}
+function resolvePoint(plan, p) { if (!p) return null; const r = applyOffset(anchorMoment(plan, p.anchor), p.at); return r ? r.at : null; }
+const overlapsDay = (win, d) => win && win.start <= endOfDay(d) && win.end >= startOfDay(d);
+
+function relText(plan, ref, o) {
+  const {a, edge} = anchorOf(plan, ref);
+  const label = a ? a.label : ref;
+  const off = parseOffset(o);
+  if (!off) return label;
+  const end = edge === 'end';
+  if (off.n === 0) return off.unit === 'h' ? `at the time of ${label}` : end ? `the last day of ${label}` : a?.kind === 'range' ? `the first day of ${label}` : `${label} day`;
+  const words = {h: ['hour', 'hours'], d: ['day', 'days'], w: ['week', 'weeks']}[off.unit];
+  const n = Math.abs(off.n);
+  return `${n} ${words[n === 1 ? 0 : 1]} ${off.n < 0 ? 'before' : 'after'} ${end ? 'the end of ' : ''}${label}`;
+}
+function whenText(plan, w) {
+  if (!w) return '';
+  if (w.phase) { const ph = (plan.knowledge.phases || []).find(p => p.id === w.phase); return ph ? `During ${ph.name}` : ''; }
+  const a = relText(plan, w.anchor, w.from);
+  const s = w.to ? `From ${a} to ${relText(plan, w.toAnchor || w.anchor, w.to)}` : a.charAt(0).toUpperCase() + a.slice(1);
+  return s;
+}
+function winDates(win) {
+  if (!win) return 'dates not set yet';
+  const f = d => fmtDay(d) + (win.hours ? ' ' + fmtTime(d) : '');
+  return +startOfDay(win.start) === +startOfDay(win.end) && !win.hours ? fmtDay(win.start) : `${f(win.start)} to ${f(win.end)}`;
+}
+function whenHtml(plan, w) {
+  if (!w) return '';
+  return `<div class="when">${esc(whenText(plan, w))} · ${esc(winDates(resolveWhen(plan, w)))}</div>`;
+}
+function phasesOn(plan, d) { return (plan.knowledge.phases || []).filter(p => overlapsDay(resolveWhen(plan, p.when), d)); }
+const visible = list => (K()[list] || []).filter(it => showHidden || !it.hidden);
+
+/* ---------- shared pieces ---------- */
+function whyHtml(why, needsWhy) {
+  if (!why || !why.text) return needsWhy ? '<div class="nudge">No reason given yet. A why helps newcomers follow this when it is inconvenient.</div>' : '';
+  const srcs = (why.sources || []).map(id => (K().sources || []).find(s => s.id === id)).filter(Boolean);
+  return `<div class="why"><b>Why</b>${esc(why.text)}${why.basis ? ` <span class="pill basis">${esc(LABELS.basis[why.basis] || why.basis)}</span>` : ''}${srcs.length ? `<div class="src">Source: ${srcs.map(s => s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.publisher ? ` (${esc(s.publisher)})` : ''}` : esc(s.title)).join('; ')}</div>` : ''}</div>`;
+}
+function toolsHtml(list, it) {
+  return `<span class="tools">${it.private ? '<span class="pill private" title="Left out when you export this plan as a template">Private</span>' : ''}<button class="icon-btn" data-act="edit" data-list="${list}" data-id="${esc(it.id)}" aria-label="Edit">Edit</button><button class="icon-btn" data-act="hide" data-list="${list}" data-id="${esc(it.id)}">${it.hidden ? 'Show' : 'Hide'}</button></span>`;
+}
+function snapshotHtml() {
+  const k = K();
+  return `<p class="snapshot">From the template “${esc(k.name)}”, written as of ${esc(k.asOf ? fmtLong(parseDay(k.asOf)) : 'an unknown date')}. It is a snapshot of shared experience: wherever your surgeon, guide, organizer or other professional says otherwise, follow them.</p>`;
+}
+function sectionHead(title, list, extra = '') {
+  const hidden = (K()[list] || []).filter(i => i.hidden).length;
+  return `<div class="section-title"><h2>${esc(title)}</h2><div class="row">${extra}${hidden ? `<button class="btn sm ghost" data-act="toggleHidden">${showHidden ? 'Hide' : 'Show'} ${hidden} hidden</button>` : ''}<button class="btn sm" data-act="add" data-list="${list}">Add</button></div></div>`;
+}
+
+/* ---------- views ---------- */
+function renderStart() {
+  return `<section class="stack">
+    <div class="hero"><h2>Plan a trip with what others learned the hard way</h2>
+      <p class="muted">A surgery, a long hike, a camping festival or a conference goes better when someone who has done it tells you what to expect. Pick a template written by an experienced participant, set your dates, and the app turns it into your own day-by-day plan: the rules and why they exist, meds, packing, food, contacts and logistics.</p>
+      <p class="muted small">Templates are snapshots of shared experience. Where the professionals or organizers in charge of your trip say otherwise, follow them.</p></div>
+    ${libraryHtml()}</section>`;
+}
+function libraryHtml() {
+  const ts = allTemplates();
+  return `<div class="section-title"><h3>Templates</h3><button class="btn sm" data-act="importTemplate">Import a template file</button></div>
+    ${loadError ? `<p class="err">${esc(loadError)}</p>` : ''}
+    <div class="cards">${ts.map(t => `<div class="card">
+      <div class="row"><span class="pill">${esc(LABELS.tripType[t.tripType] || t.tripType)}</span>${t._source === 'mine' ? '<span class="pill l2">Yours</span>' : ''}</div>
+      <b>${esc(t.name)}</b><p class="muted small grow">${esc(t.summary)}</p>
+      <p class="small muted">Version ${esc(t.version)} · as of ${esc(t.asOf)}${t.author ? ` · by ${esc(t.author)}` : ''}</p>
+      <div class="row"><button class="btn primary sm" data-act="startPlan" data-tid="${esc(t.id)}">Start a plan</button>${t._source === 'mine' ? `<button class="btn sm ghost danger" data-act="removeTemplate" data-rec="${esc(t._rec)}">Remove</button>` : ''}</div>
+    </div>`).join('') || `<p class="empty">${loaded ? 'No templates yet. Import a template file to begin.' : 'Loading templates…'}</p>`}</div>`;
+}
+
+function slotsFor(plan, opt, d) {
+  const win = resolveWhen(plan, opt.when);
+  if (!overlapsDay(win, d)) return 0;
+  const offset = daysBetween(win.start, d);
+  if (opt.repeat === 'once') return offset === 0 ? 1 : 0;
+  if (opt.repeat === 'weekly') return offset % 7 === 0 ? 1 : 0;
+  return SLOTS[opt.repeat] || 1;
+}
+function renderToday() {
+  const plan = currentPlan(), d = parseDay(viewDay), ds = viewDay;
+  const phases = phasesOn(plan, d);
+  const rules = visible('rules').filter(r => overlapsDay(resolveWhen(plan, r.when), d));
+  const food = visible('food').filter(f => overlapsDay(resolveWhen(plan, f.when), d));
+  const checks = [];
+  for (const o of visible('daily')) {
+    const n = slotsFor(plan, o, d);
+    for (let i = 0; i < n; i++) {
+      const id = `${plan.id}|${o.id}|${ds}|${i}`;
+      const rec = state.checks.find(c => c.id === id);
+      checks.push({id, title: o.title, sub: [SLOT_NAMES[n]?.[i], LABELS.dailyKind[o.kind], o.optional ? 'optional' : ''].filter(Boolean).join(' · '), done: !!rec?.done, why: o.why});
+    }
+  }
+  for (const r of state.regimens.filter(r => r.planId === plan.id)) {
+    if (!r.start || ds < r.start || (r.end && ds > r.end)) continue;
+    const med = (K().meds || []).find(m => m.id === r.medId);
+    for (const t of r.times?.length ? r.times : ['']) {
+      const id = `${r.id}|${ds}|${t}`;
+      const rec = state.doses.find(x => x.id === id);
+      checks.push({id, dose: true, title: `${med ? med.name : 'Medication'}${r.dose ? ` (${r.dose})` : ''}`, sub: ['Your dose', t].filter(Boolean).join(' · '), done: !!rec?.taken});
+    }
+  }
+  const due = [];
+  for (const p of visible('packing')) {
+    const by = resolvePoint(plan, p.obtain?.byWhen);
+    const st = state.packStatus.find(s => s.id === `${plan.id}|${p.id}`)?.status || 'need';
+    if (by && st === 'need' && daysBetween(d, by) <= 7) due.push({t: `Get: ${p.name}`, by, how: LABELS.how[p.obtain.how]});
+  }
+  for (const l of visible('logistics')) {
+    const by = resolvePoint(plan, l.byWhen);
+    const b = state.bookings.find(x => x.id === `${plan.id}|${l.id}`);
+    if (by && !b?.done && daysBetween(d, by) <= 14) due.push({t: `Sort out: ${l.title}`, by});
+  }
+  due.sort((a, b) => a.by - b.by);
+  const anyDate = Object.keys(plan.anchorDates || {}).length;
+  return `<section class="stack">
+    <div class="daybar"><h2>${esc(fmtLong(d))}</h2>
+      <button class="btn sm" data-act="day" data-n="-1" aria-label="Previous day">‹</button>
+      <button class="btn sm" data-act="day" data-n="0">Today</button>
+      <button class="btn sm" data-act="day" data-n="1" aria-label="Next day">›</button></div>
+    ${snapshotHtml()}
+    ${!anyDate ? '<div class="banner"><p>Set your trip dates so the plan can line everything up.</p><button class="btn primary sm" data-act="editPlan">Set dates</button></div>' : ''}
+    <div class="panel"><h3>Phase</h3>${phases.length ? phases.map(p => `<p><b>${esc(p.name)}</b>${p.summary ? ` <span class="muted">${esc(p.summary)}</span>` : ''}</p>`).join('') : `<p class="muted">${esc(nextPhaseText(plan, d))}</p>`}</div>
+    <div class="two">
+      <div class="panel"><h3>Checklist</h3>${checks.length ? checks.map(c => `<label class="check${c.done ? ' done' : ''}"><input type="checkbox" data-act="${c.dose ? 'dose' : 'check'}" data-id="${esc(c.id)}"${c.done ? ' checked' : ''}><span><span class="t">${esc(c.title)}</span><br><span class="small muted">${esc(c.sub)}</span></span></label>`).join('') : '<p class="empty">Nothing on the checklist for this day.</p>'}
+        <p class="small muted" style="margin-top:8px">Ticks stay private to you. Add your own doses under Meds &amp; health.</p></div>
+      <div class="stack">
+        <div class="panel"><h3>Rules in force</h3>${rules.length ? rules.map(r => `<div class="item"><div class="item-head"><span class="t">${esc(r.title)}</span><span class="pill ${esc(r.strength)}">${esc(LABELS.strength[r.strength])}</span></div>${r.detail ? `<p class="small">${esc(r.detail)}</p>` : ''}${whyHtml(r.why)}</div>`).join('') : '<p class="empty">No rules for this day.</p>'}</div>
+        ${food.length ? `<div class="panel"><h3>Food</h3>${food.map(f => `<p><b>${esc(f.name)}</b></p>${f.allowed?.length ? `<p class="small">Good: ${esc(f.allowed.join(', '))}</p>` : ''}${f.avoid?.length ? `<p class="small">Avoid: ${esc(f.avoid.join(', '))}</p>` : ''}`).join('')}</div>` : ''}
+        ${due.length ? `<div class="panel"><h3>Coming up</h3>${due.map(x => `<div class="entry"><span>${esc(x.t)}${x.how ? ` <span class="small muted">${esc(x.how)}</span>` : ''}</span><span class="meta">${x.by < startOfDay(d) ? 'overdue' : esc(fmtDay(x.by))}</span></div>`).join('')}</div>` : ''}
+      </div>
+    </div></section>`;
+}
+function nextPhaseText(plan, d) {
+  const next = (plan.knowledge.phases || []).map(p => ({p, w: resolveWhen(plan, p.when)})).filter(x => x.w && x.w.start > d).sort((a, b) => a.w.start - b.w.start)[0];
+  return next ? `Not in a phase yet. ${next.p.name} starts ${fmtDay(next.w.start)}.` : 'Outside the trip’s phases.';
+}
+
+function renderTimeline() {
+  const plan = currentPlan(), k = K();
+  const phases = (k.phases || []).map(p => ({p, w: resolveWhen(plan, p.when)}));
+  const today = new Date();
+  const placed = new Set();
+  const phaseOf = r => {
+    if (r.when?.phase) return r.when.phase;
+    const w = resolveWhen(plan, r.when);
+    if (!w) return null;
+    return phases.find(x => x.w && w.start >= x.w.start && w.start <= x.w.end)?.p.id || null;
+  };
+  const rules = visible('rules');
+  const deadlines = [
+    ...visible('packing').filter(p => p.obtain?.byWhen).map(p => ({t: `Get ${p.name}`, sub: LABELS.how[p.obtain.how], at: resolvePoint(plan, p.obtain.byWhen)})),
+    ...visible('logistics').filter(l => l.byWhen).map(l => ({t: l.title, sub: LABELS.logKind[l.kind], at: resolvePoint(plan, l.byWhen)}))
+  ];
+  const ruleHtml = r => `<div class="item"><div class="item-head"><span class="t">${esc(LABELS.kind[r.kind])}: ${esc(r.title)}</span><span class="pill ${esc(r.strength)}">${esc(LABELS.strength[r.strength])}</span>${toolsHtml('rules', r)}</div>${whenHtml(plan, r.when)}${r.detail ? `<p class="small">${esc(r.detail)}</p>` : ''}${whyHtml(r.why, r.strength !== 'tip')}</div>`;
+  const blocks = phases.map(({p, w}) => {
+    const rs = rules.filter(r => phaseOf(r) === p.id); rs.forEach(r => placed.add(r.id));
+    const ds = deadlines.filter(x => x.at && w && x.at >= w.start && x.at <= w.end); ds.forEach(x => placed.add(x));
+    const now = w && today >= w.start && today <= w.end;
+    return `<div class="panel${now ? ' phase-now' : ''}"><div class="phase-head"><h2>${esc(p.name)}</h2><span class="small muted">${esc(winDates(w))}${now ? ' · now' : ''}</span></div>${p.summary ? `<p class="muted small">${esc(p.summary)}</p>` : ''}
+      ${ds.length ? `<div style="margin-top:8px">${ds.sort((a, b) => a.at - b.at).map(x => `<div class="entry"><span>${esc(x.t)} <span class="small muted">${esc(x.sub || '')}</span></span><span class="meta">by ${esc(fmtDay(x.at))}</span></div>`).join('')}</div>` : ''}
+      <div style="margin-top:8px">${rs.map(ruleHtml).join('') || '<p class="small muted">No rules in this phase.</p>'}</div></div>`;
+  });
+  const other = rules.filter(r => !placed.has(r.id));
+  return `<section class="stack">${sectionHead('Timeline & rules', 'rules')}${snapshotHtml()}${blocks.join('')}${other.length ? `<div class="panel"><h3>Other times</h3>${other.map(ruleHtml).join('')}</div>` : ''}</section>`;
+}
+
+function renderMeds() {
+  const plan = currentPlan();
+  const meds = visible('meds');
+  return `<section class="stack">${sectionHead('Meds & health', 'meds')}${snapshotHtml()}
+    <p class="small muted">The template lists what is usually in play and why. Your own doses and times are private: they stay on this device and in your own backup, and never go into an exported template.</p>
+    ${meds.map(m => {
+      const regs = state.regimens.filter(r => r.planId === plan.id && r.medId === m.id);
+      return `<div class="panel"><div class="item-head"><span class="t">${esc(m.name)}</span><span class="pill">${esc(LABELS.medCat[m.category] || m.category)}</span>${m.rx ? `<span class="pill">${esc(LABELS.rx[m.rx])}</span>` : ''}${toolsHtml('meds', m)}</div>
+        ${whenHtml(plan, m.when)}
+        <dl class="kv" style="margin:8px 0"><dt>Purpose</dt><dd>${esc(m.purpose)}</dd>${m.typicalPattern ? `<dt>Usually</dt><dd>${esc(m.typicalPattern)}</dd>` : ''}${m.cautions ? `<dt>Cautions</dt><dd>${esc(m.cautions)}</dd>` : ''}</dl>
+        ${whyHtml(m.why)}
+        <div style="margin-top:10px"><h3>Your use</h3>${regs.map(r => `<div class="entry"><span>${esc(r.dose || 'Dose not set')} · ${esc((r.times || []).join(', ') || 'no set times')}<br><span class="meta">${esc(r.start || '?')} to ${esc(r.end || 'open')}${r.notes ? ` · ${esc(r.notes)}` : ''}</span></span><span class="row"><button class="icon-btn" data-act="editRegimen" data-id="${esc(r.id)}">Edit</button></span></div>`).join('') || '<p class="small muted">Not tracking this one.</p>'}
+        <button class="btn sm" data-act="addRegimen" data-med="${esc(m.id)}" style="margin-top:6px">Track my doses</button></div></div>`;
+    }).join('') || '<p class="empty">No medications in this plan.</p>'}</section>`;
+}
+
+function renderPacking() {
+  const plan = currentPlan();
+  const items = visible('packing');
+  const statusOf = p => state.packStatus.find(s => s.id === `${plan.id}|${p.id}`)?.status || 'need';
+  const done = items.filter(p => ['have', 'packed'].includes(statusOf(p))).length;
+  const cats = [...new Set(items.map(p => p.category || 'Other'))];
+  return `<section class="stack">${sectionHead('Packing & shopping', 'packing')}${snapshotHtml()}
+    <div class="panel"><div class="row" style="justify-content:space-between"><span>${done} of ${items.length} ready</span><span class="small muted">Status is private to you</span></div><div class="meter" style="margin-top:8px"><i style="width:${items.length ? Math.round(done / items.length * 100) : 0}%"></i></div></div>
+    ${cats.map(c => `<div class="panel"><h3>${esc(c)}</h3>${items.filter(p => (p.category || 'Other') === c).map(p => {
+      const by = resolvePoint(plan, p.obtain?.byWhen);
+      return `<div class="item"><div class="item-head"><span class="t">${esc(p.name)}${p.quantity ? ` <span class="muted small">${esc(p.quantity)}</span>` : ''}</span><span class="pill ${esc(p.need)}">${esc(LABELS.need[p.need])}</span>${toolsHtml('packing', p)}</div>
+        ${p.obtain ? `<p class="small"><b>${esc(LABELS.how[p.obtain.how])}</b>${p.obtain.where ? `: ${esc(p.obtain.where)}` : ''}${by ? ` · by ${esc(fmtDay(by))}` : ''}${p.obtain.why ? `<br><span class="muted">${esc(p.obtain.why)}</span>` : ''}</p>` : ''}
+        ${whyHtml(p.why)}
+        <label class="row small">Status <select class="status-sel" data-act="packStatus" data-id="${esc(p.id)}">${Object.entries(LABELS.status).map(([v, l]) => `<option value="${v}"${statusOf(p) === v ? ' selected' : ''}>${l}</option>`).join('')}</select></label></div>`;
+    }).join('')}</div>`).join('') || '<p class="empty">Nothing to pack yet.</p>'}</section>`;
+}
+
+function renderFood() {
+  const plan = currentPlan();
+  return `<section class="stack">${sectionHead('Food plan', 'food')}${snapshotHtml()}
+    ${visible('food').map(f => `<div class="panel"><div class="item-head"><span class="t">${esc(f.name)}</span>${toolsHtml('food', f)}</div>${whenHtml(plan, f.when)}
+      ${f.allowed?.length ? `<p class="small" style="margin-top:6px"><b>Good:</b> ${esc(f.allowed.join(', '))}</p>` : ''}${f.avoid?.length ? `<p class="small"><b>Avoid:</b> ${esc(f.avoid.join(', '))}</p>` : ''}
+      ${f.ideas?.length ? `<ul class="small" style="margin:6px 0;padding-left:18px">${f.ideas.map(i => `<li>${i.url ? `<a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.name)}</a>` : esc(i.name)} <span class="muted">${esc(i.kind)}${i.note ? ` · ${esc(i.note)}` : ''}</span></li>`).join('')}</ul>` : ''}
+      ${whyHtml(f.why)}</div>`).join('') || '<p class="empty">No food plan in this template.</p>'}</section>`;
+}
+
+function renderContacts() {
+  const plan = currentPlan();
+  const people = state.people.filter(p => p.planId === plan.id);
+  const detail = c => [['Name', c.name], ['Phone', c.phone], ['Email', c.email], ['Web', c.url], ['Address', c.address], ['Hours', c.hours], ['Notes', c.notes]].filter(x => x[1]);
+  const dl = rows => rows.length ? `<dl class="kv">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${k === 'Phone' ? `<a href="tel:${esc(v)}">${esc(v)}</a>` : k === 'Web' ? `<a href="${esc(v)}" target="_blank" rel="noopener">${esc(v)}</a>` : esc(v)}</dd>`).join('')}</dl>` : '';
+  return `<section class="stack">${sectionHead('Contacts & places', 'contacts')}
+    <p class="small muted">The template names roles, and sometimes the real people or places. Fill in your own under each role: those details are private and never exported.</p>
+    ${visible('contacts').map(c => {
+      const mine = people.filter(p => p.fillsRole === c.id);
+      return `<div class="panel"><div class="item-head"><span class="t">${esc(c.role)}</span><span class="pill">${esc(LABELS.contactKind[c.kind])}</span>${toolsHtml('contacts', c)}</div>
+        ${c.whenToUse ? `<p class="small muted">${esc(c.whenToUse)}</p>` : ''}${dl(detail(c))}
+        ${mine.map(p => `<div class="why" style="margin-top:8px"><div class="item-head"><span class="t">Yours</span><button class="icon-btn" data-act="editPerson" data-id="${esc(p.id)}">Edit</button></div>${dl(detail(p))}</div>`).join('')}
+        <button class="btn sm" data-act="addPerson" data-role="${esc(c.id)}" style="margin-top:8px">Add yours</button></div>`;
+    }).join('')}
+    <div class="panel"><div class="section-title"><h3>Other personal contacts</h3><button class="btn sm" data-act="addPerson" data-role="">Add</button></div>
+      ${people.filter(p => !p.fillsRole).map(p => `<div class="item"><div class="item-head"><span class="t">${esc(p.role || 'Contact')}</span><button class="icon-btn" data-act="editPerson" data-id="${esc(p.id)}">Edit</button></div>${dl(detail(p))}</div>`).join('') || '<p class="small muted">Emergency contacts, trip-mates, family.</p>'}</div></section>`;
+}
+
+function renderLogistics() {
+  const plan = currentPlan();
+  return `<section class="stack">${sectionHead('Logistics', 'logistics')}${snapshotHtml()}
+    ${visible('logistics').map(l => {
+      const b = state.bookings.find(x => x.id === `${plan.id}|${l.id}`) || {};
+      const by = resolvePoint(plan, l.byWhen);
+      return `<div class="panel"><div class="item-head"><span class="t">${esc(l.title)}</span><span class="pill">${esc(LABELS.logKind[l.kind])}</span>${toolsHtml('logistics', l)}</div>
+        ${by ? `<p class="when">Sort out by ${esc(fmtDay(by))} (${esc(relText(plan, l.byWhen.anchor, l.byWhen.at))})</p>` : ''}${whenHtml(plan, l.when)}
+        ${l.detail ? `<p class="small">${esc(l.detail)}</p>` : ''}${whyHtml(l.why)}
+        <div class="form" style="margin-top:8px"><label class="cb"><input type="checkbox" data-act="bookDone" data-id="${esc(l.id)}"${b.done ? ' checked' : ''}> Sorted</label>
+          <div class="inline"><label class="field">Confirmation<input type="text" data-act="bookField" data-field="confirmation" data-id="${esc(l.id)}" value="${esc(b.confirmation || '')}"></label>
+          <label class="field">Notes<input type="text" data-act="bookField" data-field="notes" data-id="${esc(l.id)}" value="${esc(b.notes || '')}"></label></div>
+          <p class="small muted">Booking details are private.</p></div></div>`;
+    }).join('') || '<p class="empty">No logistics in this plan.</p>'}</section>`;
+}
+
+function renderJournal() {
+  const plan = currentPlan();
+  const entries = state.journal.filter(j => j.planId === plan.id).sort((a, b) => (b.date + b.u).localeCompare(a.date + a.u));
+  return `<section class="stack"><div class="section-title"><h2>Journal</h2></div>
+    <p class="small muted">Private notes on how it is going. They never leave your device or your own backup.</p>
+    <div class="panel form"><label class="field">Date<input type="date" id="jDate" value="${esc(todayStr())}"></label><label class="field">Note<textarea id="jText" rows="3"></textarea></label><div><button class="btn primary" data-act="addJournal">Add note</button></div></div>
+    ${entries.map(j => `<div class="panel"><div class="item-head"><span class="t">${esc(fmtLong(parseDay(j.date)))}</span><button class="icon-btn" data-act="delJournal" data-id="${esc(j.id)}">Delete</button></div><p style="white-space:pre-wrap">${esc(j.text)}</p></div>`).join('')}</section>`;
+}
+
+function renderSettings() {
+  const plan = currentPlan();
+  return `<section class="stack"><h2>Settings</h2>
+    ${plan ? `<div class="panel stack"><h3>This plan</h3><p><b>${esc(plan.name)}</b> <span class="muted small">from “${esc(plan.templateRef?.name || '')}” version ${esc(plan.templateRef?.version || '')}</span></p>
+      <div class="row"><button class="btn" data-act="editPlan">Name and dates</button><button class="btn" data-act="exportTemplate">Export as template</button><button class="btn danger" data-act="deletePlan">Delete plan</button></div>
+      <p class="small muted">Export as template shares what you know, not who you are: your dates, doses, ticks, bookings, personal contacts and journal are left out, and you see everything before the file is written.</p></div>` : ''}
+    <div class="panel stack"><h3>Your data</h3><p class="small muted">Everything is stored in this browser. A backup holds all your plans and private tracking; keep it somewhere safe.</p>
+      <div class="row"><button class="btn" data-act="exportBackup">Export backup</button><button class="btn" data-act="importBackup">Import backup</button><button class="btn danger" data-act="eraseAll">Erase everything</button></div>
+      ${canStore ? '' : '<p class="err">This browser is not letting the app save. Export a backup before you leave.</p>'}</div></section>`;
+}
+
+/* ---------- drawers and forms ---------- */
+function openDrawer(title, inner, onSubmit) {
+  $('#layer').innerHTML = `<div class="scrim" data-act="close"></div><aside class="drawer" role="dialog" aria-modal="true" aria-label="${esc(title)}"><button class="x" data-act="close" aria-label="Close">×</button><h2>${esc(title)}</h2><form class="form" id="dform">${inner}</form></aside>`;
+  const f = $('#dform');
+  f.onsubmit = e => { e.preventDefault(); if (onSubmit(new FormData(f), f) !== false) closeDrawer(); };
+  setTimeout(() => f.querySelector('input,select,textarea')?.focus(), 30);
+}
+function closeDrawer() { $('#layer').innerHTML = ''; }
+const opt = (map, v, blank) => (blank ? `<option value="">${esc(blank)}</option>` : '') + Object.entries(map).map(([k, l]) => `<option value="${esc(k)}"${k === v ? ' selected' : ''}>${esc(l)}</option>`).join('');
+const fText = (name, label, v, attrs = '') => `<label class="field">${esc(label)}<input type="text" name="${name}" value="${esc(v || '')}" ${attrs}></label>`;
+const fArea = (name, label, v) => `<label class="field">${esc(label)}<textarea name="${name}" rows="2">${esc(v || '')}</textarea></label>`;
+const fSel = (name, label, map, v, blank) => `<label class="field">${esc(label)}<select name="${name}">${opt(map, v, blank)}</select></label>`;
+function anchorRefs(plan) {
+  const out = {};
+  for (const a of plan.knowledge.anchors || []) { if (a.kind === 'range') { out[a.id] = `${a.label} (start)`; out[`${a.id}:end`] = `${a.label} (end)`; } else out[a.id] = a.label; }
+  return out;
+}
+function offsetFields(prefix, o) {
+  const p = parseOffset(o);
+  return `<label class="field">Amount<input type="number" name="${prefix}N" value="${p ? Math.abs(p.n) : ''}" min="0"></label>
+    <label class="field">Unit<select name="${prefix}U">${opt({h: 'hours', d: 'days', w: 'weeks'}, p ? p.unit : 'd')}</select></label>
+    <label class="field">Direction<select name="${prefix}S">${opt({'-': 'before', '+': 'after'}, p && p.n >= 0 ? '+' : '-')}</select></label>`;
+}
+function readOffset(fd, prefix) {
+  const n = fd.get(prefix + 'N');
+  if (n === '' || n == null) return null;
+  return `${Number(n) === 0 ? '' : fd.get(prefix + 'S')}${Math.abs(Number(n))}${fd.get(prefix + 'U')}`;
+}
+function whenFields(plan, w, required) {
+  const mode = w?.phase ? 'phase' : w?.anchor ? 'anchor' : required ? 'phase' : 'none';
+  const refs = anchorRefs(plan);
+  return `<fieldset class="panel form"><legend class="small muted">When</legend>
+    ${fSel('wMode', 'Applies', Object.assign(required ? {} : {none: 'No particular time'}, {phase: 'During a phase', anchor: 'Relative to a key date'}), mode)}
+    ${fSel('wPhase', 'Phase', Object.fromEntries((plan.knowledge.phases || []).map(p => [p.id, p.name])), w?.phase)}
+    <div class="inline">${fSel('wAnchor', 'From key date', refs, w?.anchor)}${offsetFields('wFrom', w?.from || '0d')}</div>
+    <div class="inline">${fSel('wToAnchor', 'Until key date', refs, w?.toAnchor || w?.anchor)}${offsetFields('wTo', w?.to)}</div>
+    <p class="small muted">Leave “until” empty for a single moment. Offsets in hours count from the key date’s time, if you set one.</p></fieldset>`;
+}
+function readWhen(fd) {
+  const mode = fd.get('wMode');
+  if (mode === 'phase') return {phase: fd.get('wPhase')};
+  if (mode !== 'anchor') return null;
+  const w = {anchor: fd.get('wAnchor'), from: readOffset(fd, 'wFrom') || '0d'};
+  const to = readOffset(fd, 'wTo');
+  if (to) { w.to = to; if (fd.get('wToAnchor') !== w.anchor) w.toAnchor = fd.get('wToAnchor'); }
+  return w;
+}
+function pointFields(plan, prefix, label, p) {
+  return `<div class="inline">${fSel(prefix + 'A', label, anchorRefs(plan), p?.anchor, 'No deadline')}${offsetFields(prefix, p?.at)}</div>`;
+}
+function readPoint(fd, prefix) {
+  const a = fd.get(prefix + 'A');
+  if (!a) return null;
+  return {anchor: a, at: readOffset(fd, prefix) || '0d'};
+}
+function whyFields(why, nudge) {
+  return `<fieldset class="panel form"><legend class="small muted">Why</legend>
+    ${nudge && !why?.text ? '<p class="nudge">If the reason isn’t obvious, say it: people follow a rule they understand, even when it is inconvenient.</p>' : ''}
+    ${fArea('whyText', 'Reason', why?.text)}${fSel('whyBasis', 'Based on', LABELS.basis, why?.basis, 'Not stated')}</fieldset>`;
+}
+function readWhy(fd, old) {
+  const text = (fd.get('whyText') || '').trim();
+  if (!text) return null;
+  const y = {text};
+  if (fd.get('whyBasis')) y.basis = fd.get('whyBasis');
+  if (old?.sources?.length) y.sources = old.sources;
+  return y;
+}
+const lines = v => String(v || '').split(/\n|,/).map(s => s.trim()).filter(Boolean);
+
+const EDITORS = {
+  rules: {title: 'rule', name: it => it.title, fields: (p, it) => fText('title', 'Rule', it.title, 'required') + fArea('detail', 'What it means in practice', it.detail) +
+      `<div class="inline">${fSel('kind', 'Kind', LABELS.kind, it.kind || 'do')}${fSel('strength', 'Strength', LABELS.strength, it.strength || 'should')}</div>` + whenFields(p, it.when, true) + whyFields(it.why, true),
+    read: (fd, it) => ({title: fd.get('title').trim(), detail: fd.get('detail').trim(), kind: fd.get('kind'), strength: fd.get('strength'), when: readWhen(fd), why: readWhy(fd, it.why)})},
+  meds: {title: 'medication', name: it => it.name, fields: (p, it) => fText('name', 'Name', it.name, 'required') +
+      `<div class="inline">${fSel('category', 'Category', LABELS.medCat, it.category || 'other')}${fSel('rx', 'Usually', LABELS.rx, it.rx, 'Not stated')}</div>` + fArea('purpose', 'Purpose', it.purpose) + fText('typicalPattern', 'Typical pattern (never a personal dose)', it.typicalPattern) + fArea('cautions', 'Cautions', it.cautions) + whenFields(p, it.when, false) + whyFields(it.why, true),
+    read: (fd, it) => ({name: fd.get('name').trim(), category: fd.get('category'), rx: fd.get('rx'), purpose: fd.get('purpose').trim() || fd.get('name').trim(), typicalPattern: fd.get('typicalPattern').trim(), cautions: fd.get('cautions').trim(), when: readWhen(fd), why: readWhy(fd, it.why)})},
+  packing: {title: 'item', name: it => it.name, fields: (p, it) => fText('name', 'Item', it.name, 'required') + `<div class="inline">${fText('category', 'Group', it.category || 'Other')}${fText('quantity', 'Quantity', it.quantity)}${fSel('need', 'Need', LABELS.need, it.need || 'recommended')}</div>` +
+      `<fieldset class="panel form"><legend class="small muted">Where and when to get it</legend>${fSel('how', 'How', LABELS.how, it.obtain?.how || 'bring')}${fText('where', 'Where', it.obtain?.where)}${pointFields(p, 'by', 'Get it by', it.obtain?.byWhen)}${fText('obtainWhy', 'Why get it that way', it.obtain?.why)}</fieldset>` + whyFields(it.why, false),
+    read: (fd, it) => { const o = {how: fd.get('how')}; if (fd.get('where').trim()) o.where = fd.get('where').trim(); const by = readPoint(fd, 'by'); if (by) o.byWhen = by; if (fd.get('obtainWhy').trim()) o.why = fd.get('obtainWhy').trim();
+      return {name: fd.get('name').trim(), category: fd.get('category').trim() || 'Other', quantity: fd.get('quantity').trim(), need: fd.get('need'), obtain: o, why: readWhy(fd, it.why)}; }},
+  food: {title: 'food stage', name: it => it.name, fields: (p, it) => fText('name', 'Stage', it.name, 'required') + whenFields(p, it.when, true) + fArea('allowed', 'Good to eat (one per line)', (it.allowed || []).join('\n')) + fArea('avoid', 'Avoid (one per line)', (it.avoid || []).join('\n')) + whyFields(it.why, false),
+    read: (fd, it) => ({name: fd.get('name').trim(), when: readWhen(fd), allowed: lines(fd.get('allowed')), avoid: lines(fd.get('avoid')), ideas: it.ideas, why: readWhy(fd, it.why)})},
+  contacts: {title: 'contact or place', name: it => it.role, fields: (p, it) => `<div class="inline">${fText('role', 'Role', it.role, 'required placeholder="Surgeon, ranger station…"')}${fSel('kind', 'Kind', LABELS.contactKind, it.kind || 'person')}</div>` + fText('whenToUse', 'When to use', it.whenToUse) +
+      '<p class="small muted">Concrete details are optional. Leave them empty to keep the template abstract; you can also strip them when exporting.</p>' + ['name', 'phone', 'email', 'url', 'address', 'hours', 'notes'].map(f => fText(f, f[0].toUpperCase() + f.slice(1), it[f])).join(''),
+    read: fd => Object.fromEntries(['role', 'kind', 'whenToUse', 'name', 'phone', 'email', 'url', 'address', 'hours', 'notes'].map(f => [f, (fd.get(f) || '').trim()]))},
+  logistics: {title: 'logistics item', name: it => it.title, fields: (p, it) => `<div class="inline">${fText('title', 'What', it.title, 'required')}${fSel('kind', 'Kind', LABELS.logKind, it.kind || 'other')}</div>` + fArea('detail', 'Detail', it.detail) + pointFields(p, 'by', 'Sort it out by', it.byWhen) + whenFields(p, it.when, false) + whyFields(it.why, false),
+    read: (fd, it) => ({title: fd.get('title').trim(), kind: fd.get('kind'), detail: fd.get('detail').trim(), byWhen: readPoint(fd, 'by'), when: readWhen(fd), why: readWhy(fd, it.why)})},
+  daily: {title: 'checklist option', name: it => it.title, fields: (p, it) => fText('title', 'What', it.title, 'required') + `<div class="inline">${fSel('kind', 'Kind', LABELS.dailyKind, it.kind || 'task')}${fSel('repeat', 'How often', LABELS.repeat, it.repeat || 'daily')}</div>` +
+      `<label class="cb"><input type="checkbox" name="optional"${it.optional ? ' checked' : ''}> Optional suggestion</label>` + whenFields(p, it.when, true) + whyFields(it.why, false),
+    read: (fd, it) => ({title: fd.get('title').trim(), kind: fd.get('kind'), repeat: fd.get('repeat'), optional: !!fd.get('optional'), when: readWhen(fd), medId: it.medId, contactId: it.contactId, why: readWhy(fd, it.why)})}
+};
+function clean(o) { for (const k of Object.keys(o)) if (o[k] == null || o[k] === '' || o[k] === false || (Array.isArray(o[k]) && !o[k].length)) delete o[k]; return o; }
+function editItem(list, id) {
+  const plan = currentPlan(), ed = EDITORS[list];
+  const it = id ? K()[list].find(x => x.id === id) : {};
+  openDrawer(`${id ? 'Edit' : 'Add'} ${ed.title}`, ed.fields(plan, it) +
+    `<label class="cb"><input type="checkbox" name="private"${it.private ? ' checked' : ''}> Keep private: leave this out when exporting as a template</label>
+     <div class="row"><button class="btn primary">Save</button>${id ? `<button type="button" class="btn danger ghost" data-act="removeItem" data-list="${list}" data-id="${esc(id)}">Remove</button>` : ''}</div>`,
+    fd => {
+      const v = clean(ed.read(fd, it));
+      if (!v[Object.keys(v)[0]]) return false;
+      const k = K();
+      k[list] = k[list] || [];
+      if (id) { const i = k[list].findIndex(x => x.id === id); k[list][i] = {...clean(v), id, origin: it.origin, private: !!fd.get('private') || undefined, hidden: it.hidden}; clean(k[list][i]); }
+      else k[list].push(clean({...v, id: newItemId(ed.name(v)), private: !!fd.get('private') || undefined}));
+      touch(plan); save(); render(); toast('Saved');
+    });
+}
+
+function startPlanDrawer(tid) {
+  const t = allTemplates().find(x => x.id === tid);
+  if (!t) return;
+  openDrawer(`Start a plan`, `<p class="small muted">From “${esc(t.name)}”. Set the key dates; you can change them later.</p>${fText('name', 'Plan name', t.name, 'required')}${anchorDateFields(t.anchors, {})}<button class="btn primary">Create plan</button>`, fd => {
+    const knowledge = clone(t); delete knowledge._source; delete knowledge._rec;
+    for (const l of LISTS) for (const it of knowledge[l] || []) it.origin = it.id;
+    const plan = touch({id: rid(), name: fd.get('name').trim() || t.name, templateRef: {id: t.id, version: t.version, name: t.name}, anchorDates: readAnchorDates(fd, t.anchors), knowledge, created: nowIso()});
+    state.plans.push(plan); state.settings.currentPlan = plan.id; touchSettings(); save();
+    view = 'today'; viewDay = todayStr(); render(); toast('Plan created');
+  });
+}
+function anchorDateFields(anchors, dates) {
+  return anchors.map(a => {
+    const d = dates[a.id] || {};
+    return a.kind === 'range'
+      ? `<div class="inline"><label class="field">${esc(a.label)} starts<input type="date" name="a_${a.id}_start" value="${esc(d.start || '')}"></label><label class="field">${esc(a.label)} ends<input type="date" name="a_${a.id}_end" value="${esc(d.end || '')}"></label></div>`
+      : `<div class="inline"><label class="field">${esc(a.label)} date<input type="date" name="a_${a.id}_date" value="${esc(d.date || '')}"></label><label class="field">Time (optional)<input type="time" name="a_${a.id}_time" value="${esc(d.time || '')}"></label></div>`;
+  }).join('');
+}
+function readAnchorDates(fd, anchors) {
+  const out = {};
+  for (const a of anchors) {
+    const r = a.kind === 'range' ? {start: fd.get(`a_${a.id}_start`), end: fd.get(`a_${a.id}_end`)} : {date: fd.get(`a_${a.id}_date`), time: fd.get(`a_${a.id}_time`)};
+    clean(r);
+    if (r.start && r.end && r.end < r.start) r.end = r.start;
+    if (Object.keys(r).length) out[a.id] = r;
+  }
+  return out;
+}
+function editPlanDrawer() {
+  const plan = currentPlan();
+  openDrawer('Name and dates', fText('name', 'Plan name', plan.name, 'required') + anchorDateFields(plan.knowledge.anchors, plan.anchorDates || {}) + '<p class="small muted">Your dates are private and never exported.</p><button class="btn primary">Save</button>', fd => {
+    plan.name = fd.get('name').trim() || plan.name; plan.anchorDates = readAnchorDates(fd, plan.knowledge.anchors); touch(plan); save(); render(); toast('Saved');
+  });
+}
+function regimenDrawer(medId, id) {
+  const plan = currentPlan();
+  const r = id ? state.regimens.find(x => x.id === id) : {medId, times: []};
+  const med = K().meds.find(m => m.id === r.medId);
+  openDrawer(`Your doses: ${med ? med.name : ''}`, `<p class="small muted">Private to you. ${med?.typicalPattern ? `Usually: ${esc(med.typicalPattern)}.` : ''} Follow what your prescriber told you.</p>
+    ${fText('dose', 'Dose', r.dose, 'placeholder="e.g. 400 mg"')}${fText('times', 'Times (comma separated)', (r.times || []).join(', '), 'placeholder="08:00, 14:00, 20:00"')}
+    <div class="inline"><label class="field">From<input type="date" name="start" value="${esc(r.start || todayStr())}" required></label><label class="field">Until<input type="date" name="end" value="${esc(r.end || '')}"></label></div>
+    ${fText('prescriber', 'Prescribed by', r.prescriber)}${fArea('notes', 'Notes', r.notes)}
+    <div class="row"><button class="btn primary">Save</button>${id ? '<button type="button" class="btn danger ghost" data-act="delRegimen" data-id="' + esc(id) + '">Stop tracking</button>' : ''}</div>`, fd => {
+    const times = String(fd.get('times') || '').split(',').map(s => s.trim()).filter(s => /^\d{1,2}:\d{2}$/.test(s)).map(s => s.padStart(5, '0')).sort();
+    const rec = touch({...r, id: r.id || rid(), planId: plan.id, dose: fd.get('dose').trim(), times, start: fd.get('start'), end: fd.get('end'), prescriber: fd.get('prescriber').trim(), notes: fd.get('notes').trim()});
+    state.regimens = state.regimens.filter(x => x.id !== rec.id).concat(rec); save(); render(); toast('Saved');
+  });
+}
+function personDrawer(role, id) {
+  const plan = currentPlan();
+  const p = id ? state.people.find(x => x.id === id) : {fillsRole: role};
+  const roleItem = K().contacts.find(c => c.id === p.fillsRole);
+  openDrawer(roleItem ? `Your ${roleItem.role}` : 'Personal contact', `<p class="small muted">Private to you, never exported.</p>${roleItem ? '' : fText('role', 'Who they are', p.role, 'placeholder="Emergency contact, partner…"')}
+    ${['name', 'phone', 'email', 'address', 'notes'].map(f => fText(f, f[0].toUpperCase() + f.slice(1), p[f])).join('')}
+    <div class="row"><button class="btn primary">Save</button>${id ? `<button type="button" class="btn danger ghost" data-act="delPerson" data-id="${esc(id)}">Remove</button>` : ''}</div>`, fd => {
+    const rec = touch(clean({...p, id: p.id || rid(), planId: plan.id, role: (fd.get('role') || p.role || '').trim(), ...Object.fromEntries(['name', 'phone', 'email', 'address', 'notes'].map(f => [f, fd.get(f).trim()]))}));
+    state.people = state.people.filter(x => x.id !== rec.id).concat(rec); save(); render(); toast('Saved');
+  });
+}
+
+/* ---------- sharing ---------- */
+const CONCRETE = ['name', 'phone', 'email', 'url', 'address', 'hours', 'notes'];
+function buildExport(plan, opts) {
+  const t = clone(plan.knowledge);
+  const left = {};
+  for (const l of LISTS) {
+    const before = t[l] || [];
+    t[l] = before.filter(it => !it.private && !it.hidden);
+    left[l] = before.length - t[l].length;
+    for (const it of t[l]) { delete it.origin; delete it.private; delete it.hidden; }
+  }
+  for (const c of t.contacts || []) if (!opts.keep.has(c.id)) for (const f of CONCRETE) delete c[f];
+  const meds = new Set((t.meds || []).map(m => m.id)), contacts = new Set((t.contacts || []).map(c => c.id));
+  for (const d of t.daily || []) { if (d.medId && !meds.has(d.medId)) delete d.medId; if (d.contactId && !contacts.has(d.contactId)) delete d.contactId; }
+  for (const f of t.food || []) for (const i of f.ideas || []) if (i.contactId && !contacts.has(i.contactId)) delete i.contactId;
+  for (const l of LISTS) if (!t[l].length) delete t[l];
+  Object.assign(t, {id: opts.id, name: opts.name, version: (Number(plan.knowledge.version) || 0) + 1, asOf: todayStr()});
+  if (opts.author) t.author = opts.author; else delete t.author;
+  return {file: {format: FORMAT, formatVersion: 1, template: t}, left};
+}
+function exportDrawer() {
+  const plan = currentPlan();
+  const concrete = (plan.knowledge.contacts || []).filter(c => !c.private && !c.hidden && CONCRETE.some(f => c[f]));
+  openDrawer('Export as template', `<p class="small">This file shares the knowledge in your plan. It leaves out your dates, doses, checklist ticks, packing status, bookings, personal contacts and journal, and any item you marked private or hid.</p>
+    ${fText('id', 'Template id', plan.knowledge.id, 'required pattern="[a-z0-9]+(-[a-z0-9]+)*"')}${fText('name', 'Template name', plan.knowledge.name, 'required')}${fText('author', 'Author (optional, leave empty to stay anonymous)', plan.knowledge.author)}
+    ${concrete.length ? `<fieldset class="panel form"><legend class="small muted">Contacts with real details</legend><p class="small muted">Tick the ones whose details should go out. Unticked ones keep only their role.</p>${concrete.map(c => `<label class="cb"><input type="checkbox" name="keep" value="${esc(c.id)}"> ${esc(c.role)}: ${esc(CONCRETE.map(f => c[f]).filter(Boolean).join(', '))}</label>`).join('')}</fieldset>` : ''}
+    <details><summary class="small">Preview everything that will go out</summary><pre class="json" id="xprev"></pre></details>
+    <p class="err" id="xerr"></p>
+    <div class="row"><button class="btn primary">Download file</button><button type="button" class="btn" data-act="saveAsMine">Also keep in my templates</button></div>`, fd => {
+    const out = buildExport(plan, readExportOpts(fd));
+    const errs = checkTemplate(out.file.template);
+    if (errs.length) { $('#xerr').textContent = errs.join(' '); return false; }
+    download(`${out.file.template.id}.json`, out.file); toast('Template exported');
+  });
+  const f = $('#dform');
+  const refresh = () => { const out = buildExport(plan, readExportOpts(new FormData(f))); $('#xprev').textContent = JSON.stringify(out.file, null, 2); };
+  f.addEventListener('input', refresh); refresh();
+}
+function readExportOpts(fd) { return {id: (fd.get('id') || '').trim(), name: (fd.get('name') || '').trim(), author: (fd.get('author') || '').trim(), keep: new Set(fd.getAll('keep'))}; }
+function addTemplate(t) {
+  const rec = state.templates.find(r => r.template.id === t.id);
+  if (rec) { rec.template = t; touch(rec); } else state.templates.push(touch({id: rid(), template: t}));
+  save();
+}
+function download(name, obj) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 2)], {type: 'application/json'}));
+  a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+let fileMode = null;
+function pickFile(mode) { fileMode = mode; const f = $('#fileIn'); f.value = ''; f.click(); }
+$('#fileIn').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  let j;
+  try { j = JSON.parse(await file.text()); } catch (err) { toast('That file is not valid JSON'); return; }
+  if (fileMode === 'template') {
+    const t = j && j.format === FORMAT ? j.template : j;
+    const errs = checkTemplate(t);
+    if (errs.length) { openDrawer('This template has problems', `<ul class="err">${errs.slice(0, 12).map(x => `<li>${esc(x)}</li>`).join('')}</ul><button class="btn">Close</button>`, () => {}); return; }
+    addTemplate(t); render(); toast(`Added “${t.name}” to your templates`);
+  } else if (fileMode === 'backup') {
+    if (!j || j.version == null) { toast('That is not a Special Trip Planner backup'); return; }
+    state = mergeStates(state, fixState(j)); save(); render(); toast('Backup merged in');
+  }
+});
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.tagName === 'SELECT' || (b.tagName === 'INPUT' && b.type !== 'checkbox')) return;
+  const {act, id, list} = b.dataset;
+  const plan = currentPlan();
+  switch (act) {
+    case 'tab': view = b.dataset.v; showHidden = false; render(); window.scrollTo(0, 0); break;
+    case 'close': closeDrawer(); break;
+    case 'startPlan': startPlanDrawer(b.dataset.tid); break;
+    case 'newPlan': view = 'library'; render(); break;
+    case 'importTemplate': pickFile('template'); break;
+    case 'importBackup': pickFile('backup'); break;
+    case 'removeTemplate': state.templates = state.templates.filter(r => r.id !== b.dataset.rec); state.deleted.push(b.dataset.rec); save(); render(); toast('Template removed; plans made from it keep their copy'); break;
+    case 'day': viewDay = b.dataset.n === '0' ? todayStr() : dayStr(addDays(parseDay(viewDay), Number(b.dataset.n))); render(); break;
+    case 'editPlan': editPlanDrawer(); break;
+    case 'add': editItem(list); break;
+    case 'edit': editItem(list, id); break;
+    case 'hide': { const it = K()[list].find(x => x.id === id); it.hidden = !it.hidden || undefined; if (!it.hidden) delete it.hidden; touch(plan); save(); render(); break; }
+    case 'removeItem': K()[list] = K()[list].filter(x => x.id !== id); touch(plan); save(); closeDrawer(); render(); toast('Removed'); break;
+    case 'toggleHidden': showHidden = !showHidden; render(); break;
+    case 'check': case 'dose': {
+      const listName = act === 'check' ? 'checks' : 'doses', field = act === 'check' ? 'done' : 'taken';
+      const rec = state[listName].find(c => c.id === id);
+      if (rec) { rec[field] = b.checked; touch(rec); } else state[listName].push(touch({id, planId: plan.id, [field]: b.checked}));
+      save(); render(); break;
+    }
+    case 'addRegimen': regimenDrawer(b.dataset.med); break;
+    case 'editRegimen': regimenDrawer(null, id); break;
+    case 'delRegimen': dropRecord('regimens', id); save(); closeDrawer(); render(); break;
+    case 'addPerson': personDrawer(b.dataset.role); break;
+    case 'editPerson': personDrawer(null, id); break;
+    case 'delPerson': dropRecord('people', id); save(); closeDrawer(); render(); break;
+    case 'bookDone': setBooking(id, 'done', b.checked); break;
+    case 'addJournal': { const text = $('#jText').value.trim(); if (!text) return; state.journal.push(touch({id: rid(), planId: plan.id, date: $('#jDate').value || todayStr(), text})); save(); render(); toast('Note added'); break; }
+    case 'delJournal': dropRecord('journal', id); save(); render(); break;
+    case 'exportTemplate': exportDrawer(); break;
+    case 'saveAsMine': { const out = buildExport(plan, readExportOpts(new FormData($('#dform')))); const errs = checkTemplate(out.file.template); if (errs.length) { $('#xerr').textContent = errs.join(' '); return; } addTemplate(out.file.template); toast('Kept in your templates'); break; }
+    case 'exportBackup': download(`Special Trip Planner backup ${todayStr()}.json`, state); break;
+    case 'deletePlan': confirmDrawer(`Delete “${plan.name}”?`, 'This removes the plan and all its private tracking from this browser. Export a backup first if you might want it back.', () => {
+      for (const k of PRIVATE_LISTS) for (const r of state[k].filter(r => r.planId === plan.id)) dropRecord(k, r.id);
+      dropRecord('plans', plan.id); state.settings.currentPlan = state.plans[0]?.id || null; touchSettings(); save(); view = 'today'; render(); toast('Plan deleted');
+    }); break;
+    case 'eraseAll': confirmDrawer('Erase everything?', 'All plans, your templates and private tracking are removed from this browser.', () => {
+      const ids = [...state.plans, ...state.templates, ...PRIVATE_LISTS.flatMap(k => state[k])].map(r => r.id);
+      state = {...emptyState(), deleted: state.deleted.concat(ids)}; touchSettings(); save(); render(); toast('Everything erased');
+    }); break;
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.act === 'packStatus') {
+    const plan = currentPlan(), id = `${plan.id}|${t.dataset.id}`;
+    const rec = state.packStatus.find(s => s.id === id);
+    if (rec) { rec.status = t.value; touch(rec); } else state.packStatus.push(touch({id, planId: plan.id, itemId: t.dataset.id, status: t.value}));
+    save(); render();
+  } else if (t.dataset.act === 'bookField') setBooking(t.dataset.id, t.dataset.field, t.value.trim());
+  else if (t.id === 'planSel') { if (t.value === '__new') { view = 'library'; } else { state.settings.currentPlan = t.value; touchSettings(); } save(); render(); }
+});
+function setBooking(itemId, field, value) {
+  const plan = currentPlan(), id = `${plan.id}|${itemId}`;
+  let rec = state.bookings.find(b => b.id === id);
+  if (!rec) { rec = {id, planId: plan.id, logisticsId: itemId}; state.bookings.push(rec); }
+  rec[field] = value; touch(rec); save();
+  if (field === 'done') render();
+}
+function confirmDrawer(title, text, yes) { openDrawer(title, `<p>${esc(text)}</p><div class="row"><button class="btn danger">Yes, go ahead</button><button type="button" class="btn" data-act="close">Cancel</button></div>`, () => { yes(); }); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#layer').innerHTML) closeDrawer(); });
+let toastTimer;
+function toast(msg) {
+  let t = $('.toast');
+  if (!t) { t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+  t.textContent = msg; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), 2600);
+}
+
+/* ---------- render ---------- */
+function render() {
+  const plan = currentPlan();
+  if (plan && state.settings.currentPlan !== plan.id) state.settings.currentPlan = plan.id;
+  $('#planPick').innerHTML = state.plans.length ? `<label class="small muted" for="planSel">Plan</label><select id="planSel">${state.plans.map(p => `<option value="${esc(p.id)}"${plan && p.id === plan.id ? ' selected' : ''}>${esc(p.name)}</option>`).join('')}<option value="__new">New plan…</option></select>` : '';
+  const tabs = plan ? TABS : TABS.filter(([v]) => v === 'library' || v === 'settings');
+  if (!tabs.some(([v]) => v === view)) view = plan ? 'today' : 'library';
+  $('#tabs').innerHTML = tabs.map(([v, l]) => `<button data-act="tab" data-v="${v}" aria-selected="${v === view}">${l}</button>`).join('');
+  const views = {today: renderToday, timeline: renderTimeline, meds: renderMeds, packing: renderPacking, food: renderFood, contacts: renderContacts, logistics: renderLogistics, journal: renderJournal, settings: renderSettings,
+    library: () => plan ? `<section class="stack"><h2>Templates</h2><p class="small muted">Start another plan, or import a template someone shared with you. Imported templates stay in your browser and never go into the app's repo.</p>${libraryHtml()}</section>` : renderStart()};
+  $('#main').innerHTML = views[view]();
+}
+
+loadBuiltIns().then(render);
+render();
+</script>
+<script src="https://petravanta.github.io/general/shared/hub-link.js" defer></script>
+<script src="https://petravanta.github.io/general/shared/theme-switch.js" defer></script>
+</body>
+</html>

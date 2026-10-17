@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://petravanta.github.io/special-trip-planner/data/schema/template.schema.json",
+  "title": "Trip template",
+  "description": "What experienced people know about one kind of trip, so a newcomer can plan their own. Times are relative to the trip's anchors, never calendar dates. Nothing personal belongs here: doses taken, ticks, bookings and personal contacts live only in a person's own plan.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "tripType", "summary", "version", "asOf", "anchors", "phases"],
+  "properties": {
+    "id": {"$ref": "#/$defs/id", "description": "Stable id of the template. Plans record it, so never change or reuse one that has shipped."},
+    "name": {"type": "string", "minLength": 3, "description": "Name shown in the app, in sentence case."},
+    "tripType": {"enum": ["medical", "hiking", "festival", "conference", "other"], "description": "Kind of trip: medical (surgery or other medical stay), hiking, festival (camping festival, Burning Man), conference, other."},
+    "summary": {"type": "string", "minLength": 10, "description": "One or two sentences on what the trip is and who the template is for."},
+    "author": {"type": "string", "description": "Optional name or handle of whoever wrote the template. Leave it out to stay anonymous."},
+    "version": {"type": "integer", "minimum": 1, "description": "Raised by one each time the template is published again."},
+    "asOf": {"type": "string", "format": "date", "description": "Date this snapshot of experience was written (YYYY-MM-DD). Shown beside the advice, because the professionals in charge may have changed their guidance since."},
+    "anchors": {
+      "type": "array", "minItems": 1,
+      "description": "The trip's key dates. A plan sets the real date for each, and every timing in the template counts from them.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "label", "kind"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id", "description": "Referenced by every `when.anchor`."},
+          "label": {"type": "string", "description": "Name of the date, such as Surgery or Arrival."},
+          "kind": {"enum": ["day", "range"], "description": "day: a single date (with an optional time in the plan). range: a start and an end date; a `when` refers to the end with `<id>:end`."}
+        }
+      }
+    },
+    "phases": {
+      "type": "array", "minItems": 1,
+      "description": "Named stretches of the trip in time order, such as Pre-op or On the trail. The Today view picks the current one.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "name", "when"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"type": "string"},
+          "when": {"$ref": "#/$defs/window"},
+          "summary": {"type": "string", "description": "What this phase is about, in a sentence."}
+        }
+      }
+    },
+    "rules": {
+      "type": "array", "description": "Things to do, avoid or limit, each with its reason.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "title", "kind", "strength", "when"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "title": {"type": "string", "description": "The rule in a few words, such as No solid food."},
+          "detail": {"type": "string", "description": "Exactly what it means in practice."},
+          "kind": {"enum": ["do", "avoid", "limit"], "description": "do: something to do; avoid: something not to do; limit: something to keep under a limit."},
+          "strength": {"enum": ["must", "should", "tip"], "description": "must: required by the professional in charge or for safety; should: strongly recommended; tip: helpful."},
+          "when": {"$ref": "#/$defs/when"},
+          "why": {"$ref": "#/$defs/why"}
+        }
+      }
+    },
+    "meds": {
+      "type": "array", "description": "Medications and health items that are usually in play, with their purpose and typical pattern. A person's actual doses live only in their plan.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "name", "category", "purpose"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"type": "string", "description": "Common name, with the generic name in brackets when it helps."},
+          "category": {"enum": ["pain", "antibiotic", "blood-thinner", "bowel", "nausea", "sleep", "allergy", "altitude", "skin", "supplement", "other"], "description": "What kind of medication or health item it is."},
+          "rx": {"enum": ["prescription", "over-the-counter"], "description": "Whether it usually needs a prescription."},
+          "purpose": {"type": "string", "description": "What it is for, in plain words."},
+          "typicalPattern": {"type": "string", "description": "How it is usually taken, such as every 6 hours as needed for the first 3 to 5 days. Never a personal dose."},
+          "cautions": {"type": "string", "description": "Interactions or side effects worth knowing about."},
+          "when": {"$ref": "#/$defs/when"},
+          "why": {"$ref": "#/$defs/why"}
+        }
+      }
+    },
+    "packing": {
+      "type": "array", "description": "Gear, supplies and shopping, each with where and when to get it.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "name", "category", "need"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"type": "string"},
+          "category": {"type": "string", "description": "Free grouping shown as a heading, such as Clothing or Cooking."},
+          "need": {"enum": ["must", "recommended", "optional"], "description": "How much the item matters."},
+          "quantity": {"type": "string", "description": "How many or how much, such as 2 pairs."},
+          "when": {"$ref": "#/$defs/when"},
+          "obtain": {
+            "type": "object", "additionalProperties": false, "required": ["how"],
+            "description": "Where and when to get the item.",
+            "properties": {
+              "how": {"enum": ["bring", "buy-before", "buy-there", "rent-there", "provided"], "description": "bring: from home; buy-before: buy ahead and bring it; buy-there: buy on location; rent-there: rent on location; provided: the venue, hospital or organizer supplies it."},
+              "where": {"type": "string", "description": "A shop, website or place, if it matters."},
+              "byWhen": {"$ref": "#/$defs/point", "description": "Latest moment to get it, relative to an anchor."},
+              "why": {"type": "string", "description": "Why get it that way, such as Fuel can't fly, buy it near the trailhead."}
+            }
+          },
+          "why": {"$ref": "#/$defs/why"}
+        }
+      }
+    },
+    "food": {
+      "type": "array", "description": "Phased eating plan: what to eat in each stretch of the trip, with ideas.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "name", "when"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"type": "string", "description": "Name of the stage, such as Clear liquids or Trail days."},
+          "when": {"$ref": "#/$defs/when"},
+          "allowed": {"type": "array", "items": {"type": "string"}, "description": "Foods that fit this stage."},
+          "avoid": {"type": "array", "items": {"type": "string"}, "description": "Foods to stay away from in this stage."},
+          "ideas": {
+            "type": "array", "description": "Recipes, products or places to eat.",
+            "items": {
+              "type": "object", "additionalProperties": false, "required": ["name", "kind"],
+              "properties": {
+                "name": {"type": "string"},
+                "kind": {"enum": ["recipe", "product", "restaurant"]},
+                "note": {"type": "string"},
+                "url": {"type": "string", "format": "uri"},
+                "contactId": {"$ref": "#/$defs/id", "description": "A contact or place in this template, for a restaurant."}
+              }
+            }
+          },
+          "why": {"$ref": "#/$defs/why"}
+        }
+      }
+    },
+    "contacts": {
+      "type": "array", "description": "People, organizations and places. Each has a role; the concrete details are optional, so a template can stay abstract.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "kind", "role"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "kind": {"enum": ["person", "organization", "place"]},
+          "role": {"type": "string", "description": "What they are to the trip, such as Surgeon, Ranger station or Pharmacy."},
+          "whenToUse": {"type": "string", "description": "When to call or go there, such as Fever over 38.5 °C."},
+          "name": {"type": "string"},
+          "phone": {"type": "string"},
+          "email": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "address": {"type": "string"},
+          "hours": {"type": "string"},
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "logistics": {
+      "type": "array", "description": "Travel, lodging, tickets, permits and the like, with when to sort them out.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "kind", "title"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "kind": {"enum": ["travel", "lodging", "ticket", "permit", "transport", "insurance", "other"]},
+          "title": {"type": "string"},
+          "detail": {"type": "string"},
+          "when": {"$ref": "#/$defs/when"},
+          "byWhen": {"$ref": "#/$defs/point", "description": "Book or sort it out by then."},
+          "why": {"$ref": "#/$defs/why"}
+        }
+      }
+    },
+    "daily": {
+      "type": "array", "description": "Options for the daily checklist: activities, appointments, meds, meals and tasks. A person picks and ticks them in their own plan.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "title", "kind", "when", "repeat"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "title": {"type": "string"},
+          "kind": {"enum": ["activity", "appointment", "med", "meal", "task"]},
+          "when": {"$ref": "#/$defs/when"},
+          "repeat": {"enum": ["once", "daily", "twice-daily", "three-times-daily", "weekly"], "description": "How often it comes up while its window is open. once: on the window's first day."},
+          "optional": {"type": "boolean", "description": "True when it is a suggestion rather than part of the routine."},
+          "medId": {"$ref": "#/$defs/id", "description": "The med in this template it is about."},
+          "contactId": {"$ref": "#/$defs/id", "description": "The contact or place it involves."},
+          "why": {"$ref": "#/$defs/why"}
+        }
+      }
+    },
+    "sources": {
+      "type": "array", "description": "Where the reasons come from, listed once and cited by id.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "title", "kind"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "title": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "kind": {"enum": ["instructions", "guideline", "study", "article", "forum", "personal"], "description": "instructions: from the professional or organizer in charge; guideline: official or professional guidance; study: research; article: other writing; forum: a community discussion; personal: the author's own experience."},
+          "publisher": {"type": "string"},
+          "accessed": {"type": "string", "format": "date"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Lowercase letters, digits and hyphens. Plans refer to it, so it never changes."},
+    "offset": {"type": "string", "pattern": "^[+-]?[0-9]+[hdw]$", "description": "Hours, days or weeks from the anchor: -12h, -14d, +6w, 0d."},
+    "point": {
+      "type": "object", "additionalProperties": false, "required": ["anchor", "at"],
+      "properties": {
+        "anchor": {"$ref": "#/$defs/anchorRef"},
+        "at": {"$ref": "#/$defs/offset"}
+      }
+    },
+    "anchorRef": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(:end)?$", "description": "An anchor id, or `<id>:end` for the end of a range anchor."},
+    "window": {
+      "type": "object", "additionalProperties": false, "required": ["anchor", "from"],
+      "description": "From one moment to another, relative to an anchor. `to` may use a different anchor through `toAnchor`. Without `to` it is a single moment.",
+      "properties": {
+        "anchor": {"$ref": "#/$defs/anchorRef"},
+        "from": {"$ref": "#/$defs/offset"},
+        "to": {"$ref": "#/$defs/offset"},
+        "toAnchor": {"$ref": "#/$defs/anchorRef", "description": "Anchor for `to`, when it differs from `anchor`."}
+      }
+    },
+    "when": {
+      "description": "When something applies: a window relative to an anchor, or a whole phase.",
+      "oneOf": [
+        {"$ref": "#/$defs/window"},
+        {"type": "object", "additionalProperties": false, "required": ["phase"], "properties": {"phase": {"$ref": "#/$defs/id", "description": "A phase id; applies for the whole phase."}}}
+      ]
+    },
+    "why": {
+      "type": "object", "additionalProperties": false, "required": ["text"],
+      "description": "The reason behind the item, which motivates people to follow it when it isn't obvious.",
+      "properties": {
+        "text": {"type": "string", "minLength": 5},
+        "basis": {"enum": ["official", "evidence", "experience"], "description": "official: the instructions of the professional or organizer in charge; evidence: a guideline or study; experience: what past participants learned."},
+        "sources": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "Ids from this template's `sources`."}
+      }
+    }
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "id": "backpacking-first-trip",
+  "name": "First multi-night backpacking trip",
+  "tripType": "hiking",
+  "summary": "Two to five nights on trail, carrying everything. For someone who has day-hiked but never slept out on a backpacking route.",
+  "version": 1,
+  "asOf": "2026-10-17",
+  "anchors": [
+    {"id": "trip", "label": "On trail", "kind": "range"}
+  ],
+  "phases": [
+    {"id": "prepare", "name": "Getting ready", "when": {"anchor": "trip", "from": "-6w", "to": "-3d"}, "summary": "Permits, gear and a shakedown hike while there is still time to fix what doesn't work."},
+    {"id": "final", "name": "Last two days", "when": {"anchor": "trip", "from": "-2d", "to": "-1d"}, "summary": "Weather, food, packing and telling someone your plan."},
+    {"id": "trail", "name": "On the trail", "when": {"anchor": "trip", "from": "0d", "toAnchor": "trip:end", "to": "0d"}, "summary": "Walk, water, eat, camp, and look after your feet."},
+    {"id": "after", "name": "Back home", "when": {"anchor": "trip:end", "from": "+1d", "to": "+3d"}, "summary": "Check in, dry and clean the gear, and note what to change next time."}
+  ],
+  "rules": [
+    {"id": "permit-early", "title": "Get the permit as soon as booking opens", "kind": "do", "strength": "must", "when": {"phase": "prepare"},
+      "detail": "Popular routes cap overnight permits per night. Check the land manager's page for when reservations open.",
+      "why": {"text": "Quotas fill fast on popular routes, and camping without a permit can mean a fine or being turned around.", "basis": "experience"}},
+    {"id": "break-in-boots", "title": "Break in footwear on long day hikes", "kind": "do", "strength": "should", "when": {"anchor": "trip", "from": "-5w", "to": "-1w"},
+      "detail": "At least two hikes of several hours with the loaded pack, in the shoes and socks you will wear.",
+      "why": {"text": "Blisters are the most common way a first trip goes wrong, and new shoes rub in places you only find out about hours in.", "basis": "experience"}},
+    {"id": "shakedown", "title": "Do a shakedown night close to home", "kind": "do", "strength": "tip", "when": {"anchor": "trip", "from": "-3w", "to": "-1w"},
+      "detail": "Pitch the tent, cook a meal and sleep in the bag, even in a backyard or campground.",
+      "why": {"text": "Finding a missing tent pole or a stove that won't light is cheap at home and miserable on trail.", "basis": "experience"}},
+    {"id": "tell-someone", "title": "Leave your route and return time with someone", "kind": "do", "strength": "must", "when": {"phase": "final"},
+      "detail": "Trailhead, route, campsites, the time to raise the alarm if you haven't checked in, and the ranger station number.",
+      "why": {"text": "If you are hurt or lost, rescuers start from what someone at home can tell them. Without it nobody knows to look.", "basis": "official", "sources": ["nps-hike-smart"]}},
+    {"id": "weather-check", "title": "Check the forecast and turn back rules", "kind": "do", "strength": "must", "when": {"anchor": "trip", "from": "-2d", "to": "0d"},
+      "detail": "Look at the forecast for the elevations you will reach, and decide in advance what weather makes you turn back.",
+      "why": {"text": "Deciding the turnaround before you are tired and committed makes it much easier to actually turn around.", "basis": "experience"}},
+    {"id": "no-cotton", "title": "Skip cotton next to the skin", "kind": "avoid", "strength": "should", "when": {"phase": "trail"},
+      "detail": "Wear synthetic or wool layers and socks.",
+      "why": {"text": "Wet cotton stays wet and pulls heat from the body, which is how cool, damp days turn into hypothermia.", "basis": "experience"}},
+    {"id": "treat-water", "title": "Treat all water from streams and lakes", "kind": "do", "strength": "must", "when": {"phase": "trail"},
+      "detail": "Boil it, or filter and then disinfect it, even when it looks clean.",
+      "why": {"text": "Clear water can still carry germs that cause days of illness, often starting after you are home.", "basis": "official", "sources": ["cdc-water"]}},
+    {"id": "pack-out", "title": "Pack out all trash and food scraps", "kind": "do", "strength": "must", "when": {"phase": "trail"},
+      "why": {"text": "Scraps left behind draw animals into campsites. Leave No Trace asks hikers to pack out everything they bring in, food scraps included.", "basis": "evidence", "sources": ["lnt-principles"]}},
+    {"id": "foot-care", "title": "Stop at the first hot spot", "kind": "do", "strength": "should", "when": {"phase": "trail"},
+      "detail": "Tape or cover the spot as soon as it feels warm, before it is a blister.",
+      "why": {"text": "Five minutes on a hot spot saves days of limping on a blister.", "basis": "experience"}}
+  ],
+  "meds": [
+    {"id": "personal-meds", "name": "Your regular medications", "category": "other", "purpose": "Anything you take daily, plus a few extra days in case the trip runs long.", "typicalPattern": "As usual, with two extra days packed.", "when": {"phase": "trail"},
+      "why": {"text": "Weather or an injury can add a night, and there is no pharmacy on trail.", "basis": "experience"}},
+    {"id": "ibuprofen", "name": "Pain relief (ibuprofen or paracetamol)", "category": "pain", "rx": "over-the-counter", "purpose": "Sore knees, headaches and aches after long days.", "typicalPattern": "As needed, following the label.", "cautions": "Ibuprofen is hard on the stomach and kidneys when dehydrated; drink first.", "when": {"phase": "trail"}},
+    {"id": "antihistamine", "name": "Antihistamine", "category": "allergy", "rx": "over-the-counter", "purpose": "Insect stings, plant reactions and hay fever.", "typicalPattern": "As needed, following the label.", "when": {"phase": "trail"}},
+    {"id": "sunscreen", "name": "Sunscreen and lip balm with SPF", "category": "skin", "rx": "over-the-counter", "purpose": "Sun protection, one of the ten essentials.", "typicalPattern": "Morning and again every couple of hours in sun.", "when": {"phase": "trail"},
+      "why": {"text": "Sun is stronger at altitude and off snow or water, and a burn on day one makes every later day worse.", "basis": "official", "sources": ["nps-ten-essentials"]}}
+  ],
+  "packing": [
+    {"id": "boots", "name": "Broken-in hiking boots or trail shoes", "category": "Clothing", "need": "must",
+      "obtain": {"how": "buy-before", "byWhen": {"anchor": "trip", "at": "-6w"}, "why": "They need weeks of breaking in."}},
+    {"id": "wool-socks", "name": "Wool or synthetic hiking socks", "category": "Clothing", "need": "must", "quantity": "2 to 3 pairs",
+      "obtain": {"how": "buy-before"}},
+    {"id": "rain-shell", "name": "Rain jacket", "category": "Clothing", "need": "must", "obtain": {"how": "bring"},
+      "why": {"text": "Extra clothing is one of the ten essentials; a shell keeps you dry and blocks wind.", "basis": "official", "sources": ["nps-ten-essentials"]}},
+    {"id": "tent", "name": "Tent or shelter", "category": "Sleeping", "need": "must",
+      "obtain": {"how": "rent-there", "where": "Outdoor shops near popular trailheads often rent", "why": "Renting for a first trip avoids buying before you know what you like."}},
+    {"id": "sleeping-bag", "name": "Sleeping bag rated for the low temperature", "category": "Sleeping", "need": "must", "obtain": {"how": "rent-there"}},
+    {"id": "sleeping-pad", "name": "Insulated sleeping pad", "category": "Sleeping", "need": "must", "obtain": {"how": "rent-there"},
+      "why": {"text": "The ground pulls heat out of you faster than the air does; a good bag on a thin pad still sleeps cold.", "basis": "experience"}},
+    {"id": "stove", "name": "Backpacking stove", "category": "Cooking", "need": "recommended", "obtain": {"how": "bring", "why": "It can fly only if it is empty and cleaned of all fuel residue."},
+      "why": {"text": "Hot food and boiling water matter most on a cold, wet evening.", "basis": "experience", "sources": ["tsa-camp-stoves"]}},
+    {"id": "fuel", "name": "Fuel canister", "category": "Cooking", "need": "recommended",
+      "obtain": {"how": "buy-there", "where": "An outdoor shop or general store near the trailhead", "byWhen": {"anchor": "trip", "at": "-1d"}, "why": "Fuel can't travel by air, so buy it on arrival and check the shop's hours."}},
+    {"id": "water-filter", "name": "Water filter or purifier", "category": "Water", "need": "must",
+      "obtain": {"how": "buy-before", "byWhen": {"anchor": "trip", "at": "-2w"}, "why": "Test it at home; some need assembly or a first flush."},
+      "why": {"text": "All backcountry water needs treating.", "basis": "official", "sources": ["cdc-water"]}},
+    {"id": "map-compass", "name": "Paper map and compass", "category": "Navigation", "need": "must", "obtain": {"how": "buy-before"},
+      "why": {"text": "Phones die and lose signal. Navigation is the first of the ten essentials.", "basis": "official", "sources": ["nps-ten-essentials"]}},
+    {"id": "headlamp", "name": "Headlamp and spare batteries", "category": "Navigation", "need": "must", "obtain": {"how": "bring"}},
+    {"id": "first-aid", "name": "First-aid kit with blister care", "category": "Health", "need": "must", "obtain": {"how": "buy-before"}},
+    {"id": "trail-food", "name": "Trail food plus one extra day", "category": "Food", "need": "must", "obtain": {"how": "buy-before", "byWhen": {"anchor": "trip", "at": "-3d"}},
+      "why": {"text": "A spare day of food is the margin for a delay.", "basis": "official", "sources": ["nps-ten-essentials"]}},
+    {"id": "bear-canister", "name": "Bear-resistant food canister", "category": "Food", "need": "optional",
+      "obtain": {"how": "rent-there", "where": "Ranger stations on routes that require one", "why": "Required on some routes; rangers often rent them."}}
+  ],
+  "food": [
+    {"id": "carb-up", "name": "Before you go", "when": {"phase": "final"}, "allowed": ["Normal meals", "Plenty of water"], "avoid": ["New foods you haven't tried"],
+      "why": {"text": "A stomach upset on the drive in is a bad start.", "basis": "experience"}},
+    {"id": "trail-days", "name": "Trail days", "when": {"phase": "trail"},
+      "allowed": ["Calorie-dense snacks every hour or two", "A hot dinner", "Salty foods on hot days"], "avoid": ["Heavy canned food", "Anything that spoils without a fridge"],
+      "ideas": [
+        {"name": "Instant oats with nut butter and dried fruit", "kind": "recipe"},
+        {"name": "Couscous with olive oil, tuna pouch and spices", "kind": "recipe", "note": "Needs only boiling water and five minutes."},
+        {"name": "Freeze-dried meals", "kind": "product", "note": "Easy and light, but try one at home first."}
+      ],
+      "why": {"text": "Carrying a pack burns far more than a normal day, and running low on fuel makes you cold and clumsy.", "basis": "experience"}},
+    {"id": "recovery", "name": "Back home", "when": {"phase": "after"}, "allowed": ["A big real meal", "Plenty of fluids"]}
+  ],
+  "contacts": [
+    {"id": "ranger", "kind": "organization", "role": "Ranger station or land manager", "whenToUse": "Permits, trail conditions, and to report an emergency."},
+    {"id": "check-in", "kind": "person", "role": "Check-in person at home", "whenToUse": "Gets your route and calls for help if you miss your return time."},
+    {"id": "trail-partner", "kind": "person", "role": "Hiking partner"},
+    {"id": "gear-shop", "kind": "place", "role": "Outdoor shop near the trailhead", "whenToUse": "Fuel, rentals and anything forgotten."},
+    {"id": "trailhead", "kind": "place", "role": "Trailhead and parking"}
+  ],
+  "logistics": [
+    {"id": "permit", "kind": "permit", "title": "Overnight permit", "byWhen": {"anchor": "trip", "at": "-4w"}, "detail": "Print it or save it offline."},
+    {"id": "transport", "kind": "transport", "title": "Getting to and from the trailhead", "detail": "Car, shuttle or a ride. For a point-to-point route, plan the return leg too.",
+      "why": {"text": "Shuttles to remote trailheads can run only a few times a day, and missing the last one is a long walk.", "basis": "experience"}},
+    {"id": "night-before", "kind": "lodging", "title": "Place to sleep the night before", "when": {"anchor": "trip", "from": "-1d"}}
+  ],
+  "daily": [
+    {"id": "check-weather", "title": "Check the forecast", "kind": "task", "when": {"phase": "final"}, "repeat": "daily"},
+    {"id": "pack-list", "title": "Pack against the list", "kind": "task", "when": {"anchor": "trip", "from": "-1d"}, "repeat": "once"},
+    {"id": "send-plan", "title": "Send route and return time to your check-in person", "kind": "task", "when": {"anchor": "trip", "from": "-1d"}, "repeat": "once", "contactId": "check-in"},
+    {"id": "sunscreen-am", "title": "Sunscreen", "kind": "med", "when": {"phase": "trail"}, "repeat": "daily", "medId": "sunscreen"},
+    {"id": "water-refill", "title": "Plan the next water source", "kind": "task", "when": {"phase": "trail"}, "repeat": "daily"},
+    {"id": "foot-check", "title": "Evening foot check", "kind": "activity", "when": {"phase": "trail"}, "repeat": "daily",
+      "why": {"text": "Catching rubs at camp keeps tomorrow's walk possible.", "basis": "experience"}},
+    {"id": "check-in-home", "title": "Tell your check-in person you're out", "kind": "task", "when": {"anchor": "trip:end", "from": "0d"}, "repeat": "once", "contactId": "check-in"},
+    {"id": "dry-gear", "title": "Dry the tent and sleeping bag", "kind": "task", "when": {"phase": "after"}, "repeat": "once", "optional": true,
+      "why": {"text": "Gear packed away damp grows mildew within days.", "basis": "experience"}}
+  ],
+  "sources": [
+    {"id": "nps-ten-essentials", "title": "Ten Essentials", "url": "https://www.nps.gov/articles/10essentials.htm", "kind": "guideline", "publisher": "U.S. National Park Service", "accessed": "2026-10-17"},
+    {"id": "nps-hike-smart", "title": "Hike Smart", "url": "https://www.nps.gov/articles/hiking-safety.htm", "kind": "guideline", "publisher": "U.S. National Park Service", "accessed": "2026-10-17"},
+    {"id": "cdc-water", "title": "Water Treatment While Hiking, Camping, and Traveling", "url": "https://www.cdc.gov/drinking-water/communication-resources/water-treatment-traveling.html", "kind": "guideline", "publisher": "U.S. Centers for Disease Control and Prevention", "accessed": "2026-10-17"},
+    {"id": "lnt-principles", "title": "The 7 Principles", "url": "https://lnt.org/why/7-principles/", "kind": "guideline", "publisher": "Leave No Trace", "accessed": "2026-10-17"},
+    {"id": "tsa-camp-stoves", "title": "Camp stoves", "url": "https://www.tsa.gov/travel/security-screening/whatcanibring/items/camp-stoves", "kind": "guideline", "publisher": "U.S. Transportation Security Administration", "accessed": "2026-10-17"}
+  ]
+}
