@@ -128,6 +128,12 @@ textarea{resize:vertical}
 .why .src a{color:inherit}
 .nudge{font-size:13px;color:var(--lv-learn)}
 .when{font-size:13px;color:var(--muted)}
+details.more>summary{cursor:pointer;font-size:13px;color:var(--accent);list-style:none;padding:2px 0;width:fit-content}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:'▸';display:inline-block;width:1em;transition:transform .15s}
+details.more[open]>summary::before{transform:rotate(90deg)}
+details.more>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+details.more[open]{display:flex;flex-direction:column;gap:6px}
 .pill.must{background:var(--danger-soft);color:var(--danger)}
 .pill.should{background:var(--lv-learn-bg);color:var(--lv-learn)}
 .pill.tip,.pill.optional{background:var(--sunk);color:var(--muted)}
@@ -408,6 +414,12 @@ function whyHtml(why, needsWhy) {
 function toolsHtml(list, it) {
   return `<span class="tools">${it.private ? '<span class="pill private" title="Left out when you export this plan as a template">Private</span>' : ''}<button class="icon-btn" data-act="edit" data-list="${list}" data-id="${esc(it.id)}" aria-label="Edit">Edit</button><button class="icon-btn" data-act="hide" data-list="${list}" data-id="${esc(it.id)}">${it.hidden ? 'Show' : 'Hide'}</button></span>`;
 }
+// A rule's elaboration and reasoning fold away; its title, window and strength stay in view.
+function moreHtml(detail, why, needsWhy) {
+  const has = why && why.text, label = detail && has ? 'Details and why' : detail ? 'Details' : 'Why';
+  const body = (detail ? `<p class="small">${esc(detail)}</p>` : '') + (has ? whyHtml(why) : '');
+  return (body ? `<details class="more"><summary>${label}</summary>${body}</details>` : '') + (has ? '' : whyHtml(why, needsWhy));
+}
 const editBtn = (list, id) => `<button class="icon-btn" data-act="edit" data-list="${list}" data-id="${esc(id)}">Edit</button>`;
 function snapshotHtml() {
   const k = K();
@@ -494,7 +506,7 @@ function renderToday() {
       <div class="panel"><h3>Checklist</h3>${checks.length ? checks.map(c => `<label class="check${c.done ? ' done' : ''}"><input type="checkbox" data-act="${c.dose ? 'dose' : 'check'}" data-id="${esc(c.id)}"${c.done ? ' checked' : ''}><span><span class="t">${esc(c.title)}</span><br><span class="small muted">${esc(c.sub)}</span></span></label>`).join('') : '<p class="empty">Nothing on the checklist for this day.</p>'}
         <p class="small muted" style="margin-top:8px">Ticks stay private to you. Add your own doses under Meds &amp; health.</p></div>
       <div class="stack">
-        <div class="panel"><h3>Rules in force</h3>${rules.length ? rules.map(r => `<div class="item"><div class="item-head"><span class="t">${esc(r.title)}</span><span class="pill ${esc(r.strength)}">${esc(LABELS.strength[r.strength])}</span></div>${r.detail ? `<p class="small">${esc(r.detail)}</p>` : ''}${whyHtml(r.why)}</div>`).join('') : '<p class="empty">No rules for this day.</p>'}</div>
+        <div class="panel"><h3>Rules in force</h3>${rules.length ? rules.map(r => `<div class="item"><div class="item-head"><span class="t">${esc(r.title)}</span><span class="pill ${esc(r.strength)}">${esc(LABELS.strength[r.strength])}</span></div>${whenHtml(plan, r.when)}${moreHtml(r.detail, r.why)}</div>`).join('') : '<p class="empty">No rules for this day.</p>'}</div>
         ${food.length ? `<div class="panel"><h3>Food</h3>${food.map(f => `<p><b>${esc(f.name)}</b></p>${f.allowed?.length ? `<p class="small">Good: ${esc(f.allowed.join(', '))}</p>` : ''}${f.avoid?.length ? `<p class="small">Avoid: ${esc(f.avoid.join(', '))}</p>` : ''}`).join('')}</div>` : ''}
         ${due.length ? `<div class="panel"><h3>Coming up</h3>${due.map(x => `<div class="entry"><span>${esc(x.t)}${x.how ? ` <span class="small muted">${esc(x.how)}</span>` : ''}</span><span class="meta">${x.by < startOfDay(d) ? 'overdue' : esc(fmtDay(x.by))}</span></div>`).join('')}</div>` : ''}
       </div>
@@ -521,7 +533,7 @@ function renderTimeline() {
     ...visible('packing').filter(p => p.obtain?.byWhen).map(p => ({t: `Get ${p.name}`, sub: LABELS.how[p.obtain.how], at: resolvePoint(plan, p.obtain.byWhen)})),
     ...visible('logistics').filter(l => l.byWhen).map(l => ({t: l.title, sub: LABELS.logKind[l.kind], at: resolvePoint(plan, l.byWhen)}))
   ];
-  const ruleHtml = r => `<div class="item"><div class="item-head"><span class="t">${esc(LABELS.kind[r.kind])}: ${esc(r.title)}</span><span class="pill ${esc(r.strength)}">${esc(LABELS.strength[r.strength])}</span>${toolsHtml('rules', r)}</div>${whenHtml(plan, r.when)}${r.detail ? `<p class="small">${esc(r.detail)}</p>` : ''}${whyHtml(r.why, r.strength !== 'tip')}</div>`;
+  const ruleHtml = r => `<div class="item"><div class="item-head"><span class="t">${esc(LABELS.kind[r.kind])}: ${esc(r.title)}</span><span class="pill ${esc(r.strength)}">${esc(LABELS.strength[r.strength])}</span>${toolsHtml('rules', r)}</div>${whenHtml(plan, r.when)}${moreHtml(r.detail, r.why, r.strength !== 'tip')}</div>`;
   const blocks = phases.map(({p, w}) => {
     const rs = rules.filter(r => phaseOf(r) === p.id); rs.forEach(r => placed.add(r.id));
     const ds = deadlines.filter(x => x.at && w && x.at >= w.start && x.at <= w.end); ds.forEach(x => placed.add(x));
