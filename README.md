@@ -14,7 +14,7 @@ Experienced participants in higher-stakes trips (a surgery or other medical stay
 
 - **Templates vs. plans.** A template is what someone experienced knows about a kind of trip. Starting a plan copies it, so you can edit, add or hide anything without changing the original.
 - **The why behind every rule.** Rules, meds and packing items carry a reason, marked as official (the professional or organizer in charge), evidence (a guideline or study) or experience, with sources. The app nudges you when a rule has no reason.
-- **Views:** Today, Timeline & rules, Meds & health, Packing & shopping (with where and when to get each item), Food, Contacts & places, Logistics, Journal.
+- **Views:** Today, Timeline & rules (as a list or a month calendar of the phases and key dates), Meds & health, Packing & shopping (with where and when to get each item), Food, Contacts & places, Logistics, Journal.
 - **Private tracking.** Your dates, doses, checklist ticks, packing status, bookings, personal contacts and journal are private.
 - **Write your own template.** *Create a new template* names it, sets its key dates and starts three phases around the main one. Fill it in like a plan, add key dates and sources under *Settings*, then export it.
 - **Share what you know, not who you are.** *Settings → Export as template* writes a template file from your plan with all private tracking left out, a choice per contact to keep its real details or only its role, and a full preview first.
