@@ -1,0 +1,24 @@
+name: Check data
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Match the schemas
+        run: |
+          npx --yes ajv-cli@5 validate --spec=draft2020 --all-errors -s data/schema/templates.schema.json -d data/templates.json
+          npx --yes -p ajv-cli@5 -p ajv-formats@3 ajv validate --spec=draft2020 --all-errors -c ajv-formats -s data/schema/template.schema.json -d "data/templates/*.json"
+      - name: Check ids and references
+        run: node scripts/check-data.js
