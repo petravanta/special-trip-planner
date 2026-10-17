@@ -1,10 +1,10 @@
 # Writing a trip template
 
-A template is one JSON file describing what you know about a kind of trip. You can write one by hand, or build it in the app and use *Settings → Export as template*.
+A template is one JSON file describing what you know about a kind of trip. You can write one by hand, or build it in the app: *Templates → Create a new template* (or start from an existing one), fill it in, then use *Settings → Export as template*.
 
 ## The pieces
 
-- **anchors**: the key dates, such as `surgery` (a single day) or `trip` (a range with a start and end). Everything else is timed from them.
+- **anchors**: the key dates, such as `surgery` (a single day) or `trip` (a range with a start and end). A template can have several, like `surgery` plus `follow-up`; each person sets their own date for each one. Everything else is timed from them.
 - **phases**: named stretches like *Pre-op* or *On the trail*, each with a `when`.
 - **when**: either `{"phase": "pre-op"}` or `{"anchor": "surgery", "from": "-14d", "to": "-1d"}`. Offsets are hours, days or weeks: `-12h`, `-14d`, `+6w`, `0d`. Use `"trip:end"` for the end of a range anchor, and `toAnchor` when the window ends relative to a different anchor.
 - **rules, meds, packing, food, contacts, logistics, daily**: the content of each view. See the field descriptions in `data/schema/template.schema.json`.
