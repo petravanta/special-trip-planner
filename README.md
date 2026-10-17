@@ -6,8 +6,8 @@ Experienced participants in higher-stakes trips (a surgery or other medical stay
 
 **[Open Special Trip Planner → petravanta.github.io/special-trip-planner](https://petravanta.github.io/special-trip-planner/)**
 
-1. Pick a template, or **Import a template file** someone shared with you.
-2. Set your key dates (surgery day, the days on trail, the festival week). Everything in the template lines up from them.
+1. Pick a template, **Import a template file** someone shared with you, or **Create a new template** to write down what you know.
+2. Set your key dates (surgery day and a follow-up visit, the days on trail, the festival week). A template can have as many key dates as it needs, and everything in it lines up from them.
 3. Open **Today** each day: the phase you are in, the rules in force and why, your checklist, food, and what is coming up.
 
 ## What it does
@@ -16,9 +16,10 @@ Experienced participants in higher-stakes trips (a surgery or other medical stay
 - **The why behind every rule.** Rules, meds and packing items carry a reason, marked as official (the professional or organizer in charge), evidence (a guideline or study) or experience, with sources. The app nudges you when a rule has no reason.
 - **Views:** Today, Timeline & rules, Meds & health, Packing & shopping (with where and when to get each item), Food, Contacts & places, Logistics, Journal.
 - **Private tracking.** Your dates, doses, checklist ticks, packing status, bookings, personal contacts and journal are private.
+- **Write your own template.** *Create a new template* names it, sets its key dates and starts three phases around the main one. Fill it in like a plan, add key dates and sources under *Settings*, then export it.
 - **Share what you know, not who you are.** *Settings → Export as template* writes a template file from your plan with all private tracking left out, a choice per contact to keep its real details or only its role, and a full preview first.
 
-Templates are a dated snapshot of shared experience. Wherever the surgeon, guide, organizer or other professional in charge says otherwise, follow them; the app says so next to the advice.
+Templates are a dated snapshot of shared experience. Wherever your subject matter expert says otherwise, follow them; the app says so next to the advice.
 
 ## Your data
 
