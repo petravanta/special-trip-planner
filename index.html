@@ -408,9 +408,10 @@ function whyHtml(why, needsWhy) {
 function toolsHtml(list, it) {
   return `<span class="tools">${it.private ? '<span class="pill private" title="Left out when you export this plan as a template">Private</span>' : ''}<button class="icon-btn" data-act="edit" data-list="${list}" data-id="${esc(it.id)}" aria-label="Edit">Edit</button><button class="icon-btn" data-act="hide" data-list="${list}" data-id="${esc(it.id)}">${it.hidden ? 'Show' : 'Hide'}</button></span>`;
 }
+const editBtn = (list, id) => `<button class="icon-btn" data-act="edit" data-list="${list}" data-id="${esc(id)}">Edit</button>`;
 function snapshotHtml() {
   const k = K();
-  return `<p class="snapshot">From the template “${esc(k.name)}”, written as of ${esc(k.asOf ? fmtLong(parseDay(k.asOf)) : 'an unknown date')}. It is a snapshot of shared experience: wherever your surgeon, guide, organizer or other professional says otherwise, follow them.</p>`;
+  return `<p class="snapshot">From the template “${esc(k.name)}”, written as of ${esc(k.asOf ? fmtLong(parseDay(k.asOf)) : 'an unknown date')}. It is a snapshot of shared experience: wherever your subject matter expert says otherwise, follow them.</p>`;
 }
 function sectionHead(title, list, extra = '') {
   const hidden = (K()[list] || []).filter(i => i.hidden).length;
@@ -422,12 +423,12 @@ function renderStart() {
   return `<section class="stack">
     <div class="hero"><h2>Plan a trip with what others learned the hard way</h2>
       <p class="muted">A surgery, a long hike, a camping festival or a conference goes better when someone who has done it tells you what to expect. Pick a template written by an experienced participant, set your dates, and the app turns it into your own day-by-day plan: the rules and why they exist, meds, packing, food, contacts and logistics.</p>
-      <p class="muted small">Templates are snapshots of shared experience. Where the professionals or organizers in charge of your trip say otherwise, follow them.</p></div>
+      <p class="muted small">Templates are snapshots of shared experience: wherever your subject matter expert says otherwise, follow them.</p></div>
     ${libraryHtml()}</section>`;
 }
 function libraryHtml() {
   const ts = allTemplates();
-  return `<div class="section-title"><h3>Templates</h3><button class="btn sm" data-act="importTemplate">Import a template file</button></div>
+  return `<div class="section-title"><h3>Templates</h3><div class="row"><button class="btn sm" data-act="newTemplate">Create a new template</button><button class="btn sm" data-act="importTemplate">Import a template file</button></div></div>
     ${loadError ? `<p class="err">${esc(loadError)}</p>` : ''}
     <div class="cards">${ts.map(t => `<div class="card">
       <div class="row"><span class="pill">${esc(LABELS.tripType[t.tripType] || t.tripType)}</span>${t._source === 'mine' ? '<span class="pill l2">Yours</span>' : ''}</div>
@@ -480,14 +481,14 @@ function renderToday() {
     if (by && !b?.done && daysBetween(d, by) <= 14) due.push({t: `Sort out: ${l.title}`, by});
   }
   due.sort((a, b) => a.by - b.by);
-  const anyDate = Object.keys(plan.anchorDates || {}).length;
+  const unset = (K().anchors || []).filter(a => { const x = plan.anchorDates?.[a.id]; return !(x && (x.date || x.start)); });
   return `<section class="stack">
     <div class="daybar"><h2>${esc(fmtLong(d))}</h2>
       <button class="btn sm" data-act="day" data-n="-1" aria-label="Previous day">‹</button>
       <button class="btn sm" data-act="day" data-n="0">Today</button>
       <button class="btn sm" data-act="day" data-n="1" aria-label="Next day">›</button></div>
     ${snapshotHtml()}
-    ${!anyDate ? '<div class="banner"><p>Set your trip dates so the plan can line everything up.</p><button class="btn primary sm" data-act="editPlan">Set dates</button></div>' : ''}
+    ${unset.length ? `<div class="banner"><p>Set ${unset.length === (K().anchors || []).length ? 'your trip dates' : `the date for ${esc(unset.map(a => a.label).join(', '))}`} so the plan can line everything up.</p><button class="btn primary sm" data-act="editPlan">Set dates</button></div>` : ''}
     <div class="panel"><h3>Phase</h3>${phases.length ? phases.map(p => `<p><b>${esc(p.name)}</b>${p.summary ? ` <span class="muted">${esc(p.summary)}</span>` : ''}</p>`).join('') : `<p class="muted">${esc(nextPhaseText(plan, d))}</p>`}</div>
     <div class="two">
       <div class="panel"><h3>Checklist</h3>${checks.length ? checks.map(c => `<label class="check${c.done ? ' done' : ''}"><input type="checkbox" data-act="${c.dose ? 'dose' : 'check'}" data-id="${esc(c.id)}"${c.done ? ' checked' : ''}><span><span class="t">${esc(c.title)}</span><br><span class="small muted">${esc(c.sub)}</span></span></label>`).join('') : '<p class="empty">Nothing on the checklist for this day.</p>'}
@@ -525,12 +526,12 @@ function renderTimeline() {
     const rs = rules.filter(r => phaseOf(r) === p.id); rs.forEach(r => placed.add(r.id));
     const ds = deadlines.filter(x => x.at && w && x.at >= w.start && x.at <= w.end); ds.forEach(x => placed.add(x));
     const now = w && today >= w.start && today <= w.end;
-    return `<div class="panel${now ? ' phase-now' : ''}"><div class="phase-head"><h2>${esc(p.name)}</h2><span class="small muted">${esc(winDates(w))}${now ? ' · now' : ''}</span></div>${p.summary ? `<p class="muted small">${esc(p.summary)}</p>` : ''}
+    return `<div class="panel${now ? ' phase-now' : ''}"><div class="phase-head"><h2>${esc(p.name)}</h2><span class="row"><span class="small muted">${esc(winDates(w))}${now ? ' · now' : ''}</span>${editBtn('phases', p.id)}</span></div><p class="when">${esc(whenText(plan, p.when))}</p>${p.summary ? `<p class="muted small">${esc(p.summary)}</p>` : ''}
       ${ds.length ? `<div style="margin-top:8px">${ds.sort((a, b) => a.at - b.at).map(x => `<div class="entry"><span>${esc(x.t)} <span class="small muted">${esc(x.sub || '')}</span></span><span class="meta">by ${esc(fmtDay(x.at))}</span></div>`).join('')}</div>` : ''}
       <div style="margin-top:8px">${rs.map(ruleHtml).join('') || '<p class="small muted">No rules in this phase.</p>'}</div></div>`;
   });
   const other = rules.filter(r => !placed.has(r.id));
-  return `<section class="stack">${sectionHead('Timeline & rules', 'rules')}${snapshotHtml()}${blocks.join('')}${other.length ? `<div class="panel"><h3>Other times</h3>${other.map(ruleHtml).join('')}</div>` : ''}</section>`;
+  return `<section class="stack">${sectionHead('Timeline & rules', 'rules', '<button class="btn sm" data-act="add" data-list="phases">Add phase</button>')}${snapshotHtml()}${blocks.join('') || '<p class="empty">No phases yet. Add one to group the rules by stretch of the trip.</p>'}${other.length ? `<div class="panel"><h3>Other times</h3>${other.map(ruleHtml).join('')}</div>` : ''}</section>`;
 }
 
 function renderMeds() {
@@ -623,7 +624,16 @@ function renderSettings() {
   return `<section class="stack"><h2>Settings</h2>
     ${plan ? `<div class="panel stack"><h3>This plan</h3><p><b>${esc(plan.name)}</b> <span class="muted small">from “${esc(plan.templateRef?.name || '')}” version ${esc(plan.templateRef?.version || '')}</span></p>
       <div class="row"><button class="btn" data-act="editPlan">Name and dates</button><button class="btn" data-act="exportTemplate">Export as template</button><button class="btn danger" data-act="deletePlan">Delete plan</button></div>
-      <p class="small muted">Export as template shares what you know, not who you are: your dates, doses, ticks, bookings, personal contacts and journal are left out, and you see everything before the file is written.</p></div>` : ''}
+      <p class="small muted">Export as template shares what you know, not who you are: your dates, doses, ticks, bookings, personal contacts and journal are left out, and you see everything before the file is written.</p></div>
+    <div class="panel stack"><div class="section-title"><h3>Template details</h3><button class="btn sm" data-act="editMeta">Edit</button></div>
+      <dl class="kv"><dt>Name</dt><dd>${esc(K().name)}</dd><dt>Kind</dt><dd>${esc(LABELS.tripType[K().tripType] || K().tripType)}</dd><dt>Summary</dt><dd>${esc(K().summary || 'Not written yet')}</dd>${K().author ? `<dt>Author</dt><dd>${esc(K().author)}</dd>` : ''}</dl></div>
+    <div class="panel"><div class="section-title"><h3>Key dates</h3><button class="btn sm" data-act="add" data-list="anchors">Add key date</button></div>
+      <p class="small muted">The dates everything in the plan is timed from. A template can have several, such as a surgery and a follow-up visit.</p>
+      ${(K().anchors || []).map(a => { const d = plan.anchorDates?.[a.id]; return `<div class="entry"><span>${esc(a.label)} <span class="small muted">${a.kind === 'range' ? 'range' : 'single day'}</span><br><span class="meta">${d ? esc(a.kind === 'range' ? `${d.start || '?'} to ${d.end || '?'}` : `${d.date || '?'}${d.time ? ' ' + d.time : ''}`) : 'your date not set'}</span></span>${editBtn('anchors', a.id)}</div>`; }).join('')}
+      <button class="btn sm" data-act="editPlan" style="margin-top:8px">Set my dates</button></div>
+    <div class="panel"><div class="section-title"><h3>Sources</h3><button class="btn sm" data-act="add" data-list="sources">Add source</button></div>
+      <p class="small muted">Where the reasons come from. Cite them from any item’s Why.</p>
+      ${(K().sources || []).map(src => `<div class="entry"><span>${src.url ? `<a href="${esc(src.url)}" target="_blank" rel="noopener">${esc(src.title)}</a>` : esc(src.title)}<br><span class="meta">${esc(src.publisher || src.kind)}</span></span>${editBtn('sources', src.id)}</div>`).join('') || '<p class="small muted">No sources yet.</p>'}</div>` : ''}
     <div class="panel stack"><h3>Your data</h3><p class="small muted">Everything is stored in this browser. A backup holds all your plans and private tracking; keep it somewhere safe.</p>
       <div class="row"><button class="btn" data-act="exportBackup">Export backup</button><button class="btn" data-act="importBackup">Import backup</button><button class="btn danger" data-act="eraseAll">Erase everything</button></div>
       ${canStore ? '' : '<p class="err">This browser is not letting the app save. Export a backup before you leave.</p>'}</div></section>`;
@@ -657,12 +667,12 @@ function readOffset(fd, prefix) {
   if (n === '' || n == null) return null;
   return `${Number(n) === 0 ? '' : fd.get(prefix + 'S')}${Math.abs(Number(n))}${fd.get(prefix + 'U')}`;
 }
-function whenFields(plan, w, required) {
-  const mode = w?.phase ? 'phase' : w?.anchor ? 'anchor' : required ? 'phase' : 'none';
+function whenFields(plan, w, required, noPhase) {
+  const mode = w?.phase ? 'phase' : w?.anchor ? 'anchor' : required ? (noPhase || !(plan.knowledge.phases || []).length ? 'anchor' : 'phase') : 'none';
   const refs = anchorRefs(plan);
   return `<fieldset class="panel form"><legend class="small muted">When</legend>
-    ${fSel('wMode', 'Applies', Object.assign(required ? {} : {none: 'No particular time'}, {phase: 'During a phase', anchor: 'Relative to a key date'}), mode)}
-    ${fSel('wPhase', 'Phase', Object.fromEntries((plan.knowledge.phases || []).map(p => [p.id, p.name])), w?.phase)}
+    ${fSel('wMode', 'Applies', Object.assign(required ? {} : {none: 'No particular time'}, noPhase ? {} : {phase: 'During a phase'}, {anchor: 'Relative to a key date'}), mode)}
+    ${noPhase ? '' : fSel('wPhase', 'Phase', Object.fromEntries((plan.knowledge.phases || []).map(p => [p.id, p.name])), w?.phase)}
     <div class="inline">${fSel('wAnchor', 'From key date', refs, w?.anchor)}${offsetFields('wFrom', w?.from || '0d')}</div>
     <div class="inline">${fSel('wToAnchor', 'Until key date', refs, w?.toAnchor || w?.anchor)}${offsetFields('wTo', w?.to)}</div>
     <p class="small muted">Leave “until” empty for a single moment. Offsets in hours count from the key date’s time, if you set one.</p></fieldset>`;
@@ -687,19 +697,31 @@ function readPoint(fd, prefix) {
 function whyFields(why, nudge) {
   return `<fieldset class="panel form"><legend class="small muted">Why</legend>
     ${nudge && !why?.text ? '<p class="nudge">If the reason isn’t obvious, say it: people follow a rule they understand, even when it is inconvenient.</p>' : ''}
-    ${fArea('whyText', 'Reason', why?.text)}${fSel('whyBasis', 'Based on', LABELS.basis, why?.basis, 'Not stated')}</fieldset>`;
+    ${fArea('whyText', 'Reason', why?.text)}${fSel('whyBasis', 'Based on', LABELS.basis, why?.basis, 'Not stated')}
+    ${(K().sources || []).length ? `<div class="small muted">Sources</div>${K().sources.map(src => `<label class="cb"><input type="checkbox" name="whySrc" value="${esc(src.id)}"${why?.sources?.includes(src.id) ? ' checked' : ''}> ${esc(src.title)}</label>`).join('')}` : '<p class="small muted">Add sources under Settings to cite them here.</p>'}</fieldset>`;
 }
 function readWhy(fd, old) {
   const text = (fd.get('whyText') || '').trim();
   if (!text) return null;
   const y = {text};
   if (fd.get('whyBasis')) y.basis = fd.get('whyBasis');
-  if (old?.sources?.length) y.sources = old.sources;
+  const srcs = fd.getAll('whySrc');
+  if (srcs.length) y.sources = srcs;
   return y;
 }
 const lines = v => String(v || '').split(/\n|,/).map(s => s.trim()).filter(Boolean);
 
 const EDITORS = {
+  phases: {title: 'phase', noPrivate: true, name: it => it.name, fields: (p, it) => fText('name', 'Phase', it.name, 'required placeholder="Pre-op, On the trail…"') + fArea('summary', 'What this stretch is about', it.summary) + whenFields(p, it.when, true, true),
+    read: fd => ({name: fd.get('name').trim(), summary: fd.get('summary').trim(), when: readWhen(fd)})},
+  anchors: {title: 'key date', noPrivate: true, name: it => it.label, fields: (p, it) => fText('label', 'Name of the date', it.label, 'required placeholder="Surgery, Arrival, Follow-up visit…"') +
+      (it.id ? `<p class="small muted">${it.kind === 'range' ? 'A range with a start and an end.' : 'A single day, with an optional time.'}</p>` : fSel('kind', 'Kind', {day: 'A single day (optional time)', range: 'A range: start and end dates'}, 'day')) +
+      '<p class="small muted">Each person sets their own date for it when they plan. Templates only hold the name.</p>',
+    read: (fd, it) => ({label: fd.get('label').trim(), kind: it.kind || fd.get('kind')})},
+  sources: {title: 'source', noPrivate: true, name: it => it.title, fields: (p, it) => fText('title', 'Title', it.title, 'required') + `<label class="field">Link<input type="url" name="url" value="${esc(it.url || '')}"></label>` +
+      `<div class="inline">${fSel('kind', 'Kind', {instructions: 'Instructions from the professional in charge', guideline: 'Guideline', study: 'Study', article: 'Article', forum: 'Forum', personal: 'Personal experience'}, it.kind || 'guideline')}${fText('publisher', 'Publisher', it.publisher)}</div>` +
+      `<label class="field">Accessed<input type="date" name="accessed" value="${esc(it.accessed || todayStr())}"></label>`,
+    read: fd => ({title: fd.get('title').trim(), url: fd.get('url').trim(), kind: fd.get('kind'), publisher: fd.get('publisher').trim(), accessed: fd.get('accessed')})},
   rules: {title: 'rule', name: it => it.title, fields: (p, it) => fText('title', 'Rule', it.title, 'required') + fArea('detail', 'What it means in practice', it.detail) +
       `<div class="inline">${fSel('kind', 'Kind', LABELS.kind, it.kind || 'do')}${fSel('strength', 'Strength', LABELS.strength, it.strength || 'should')}</div>` + whenFields(p, it.when, true) + whyFields(it.why, true),
     read: (fd, it) => ({title: fd.get('title').trim(), detail: fd.get('detail').trim(), kind: fd.get('kind'), strength: fd.get('strength'), when: readWhen(fd), why: readWhy(fd, it.why)})},
@@ -726,19 +748,50 @@ function editItem(list, id) {
   const plan = currentPlan(), ed = EDITORS[list];
   const it = id ? K()[list].find(x => x.id === id) : {};
   openDrawer(`${id ? 'Edit' : 'Add'} ${ed.title}`, ed.fields(plan, it) +
-    `<label class="cb"><input type="checkbox" name="private"${it.private ? ' checked' : ''}> Keep private: leave this out when exporting as a template</label>
-     <div class="row"><button class="btn primary">Save</button>${id ? `<button type="button" class="btn danger ghost" data-act="removeItem" data-list="${list}" data-id="${esc(id)}">Remove</button>` : ''}</div>`,
+    (ed.noPrivate ? '' : `<label class="cb"><input type="checkbox" name="private"${it.private ? ' checked' : ''}> Keep private: leave this out when exporting as a template</label>`) +
+     `<div class="row"><button class="btn primary">Save</button>${id ? `<button type="button" class="btn danger ghost" data-act="removeItem" data-list="${list}" data-id="${esc(id)}">Remove</button>` : ''}</div>`,
     fd => {
       const v = clean(ed.read(fd, it));
       if (!v[Object.keys(v)[0]]) return false;
       const k = K();
       k[list] = k[list] || [];
       if (id) { const i = k[list].findIndex(x => x.id === id); k[list][i] = {...clean(v), id, origin: it.origin, private: !!fd.get('private') || undefined, hidden: it.hidden}; clean(k[list][i]); }
-      else k[list].push(clean({...v, id: newItemId(ed.name(v)), private: !!fd.get('private') || undefined}));
+      else k[list].push(clean({...v, id: ed.noPrivate && !k[list].some(x => x.id === slug(ed.name(v))) ? slug(ed.name(v)) : newItemId(ed.name(v)), private: !!fd.get('private') || undefined}));
       touch(plan); save(); render(); toast('Saved');
     });
 }
 
+function defaultPhases(a) {
+  const end = a.kind === 'range' ? `${a.id}:end` : a.id;
+  return [
+    {id: 'before', name: 'Getting ready', when: {anchor: a.id, from: '-4w', to: '-1d'}},
+    {id: 'during', name: a.kind === 'range' ? a.label : `${a.label} day`, when: a.kind === 'range' ? {anchor: a.id, from: '0d', toAnchor: end, to: '0d'} : {anchor: a.id, from: '0d'}},
+    {id: 'after', name: 'Afterwards', when: {anchor: end, from: '+1d', to: '+2w'}}
+  ];
+}
+function newTemplateDrawer() {
+  const row = i => `<div class="inline">${fText(`al${i}`, i ? `Another key date (optional)` : 'Main key date', '', i ? 'placeholder="Follow-up visit, Departure…"' : 'required placeholder="Surgery, On trail, Festival week…"')}${fSel(`ak${i}`, 'Kind', {day: 'Single day', range: 'Range'}, 'day')}</div>`;
+  openDrawer('Create a new template', `<p class="small muted">Write down what you know about a kind of trip. You fill it in like a plan, then export it as a template from Settings.</p>
+    ${fText('name', 'Template name', '', 'required placeholder="Knee replacement at a day clinic"')}${fSel('tripType', 'Kind of trip', LABELS.tripType, 'medical')}${fArea('summary', 'Who it is for, in a sentence or two', '')}
+    ${row(0)}${row(1)}${row(2)}<p class="small muted">You can add, rename or remove key dates later under Settings. Three starter phases are created around the main date; edit them on the Timeline.</p>
+    <button class="btn primary">Create and start filling in</button>`, fd => {
+    const anchors = [];
+    for (let i = 0; i < 3; i++) { const label = (fd.get(`al${i}`) || '').trim(); if (label) anchors.push({id: anchors.some(a => a.id === slug(label)) ? newItemId(label) : slug(label), label, kind: fd.get(`ak${i}`)}); }
+    const name = fd.get('name').trim();
+    const knowledge = {id: slug(name), name, tripType: fd.get('tripType'), summary: fd.get('summary').trim(), version: 0, asOf: todayStr(), anchors, phases: defaultPhases(anchors[0]), sources: []};
+    for (const l of LISTS) knowledge[l] = [];
+    const plan = touch({id: rid(), name, templateRef: {id: knowledge.id, version: 0, name, draft: true}, anchorDates: {}, knowledge, created: nowIso()});
+    state.plans.push(plan); state.settings.currentPlan = plan.id; touchSettings(); save();
+    view = 'timeline'; render(); toast('Template started. Add rules, meds, packing and more, then export it from Settings.');
+  });
+}
+function editMetaDrawer() {
+  const plan = currentPlan(), k = K();
+  openDrawer('Template details', `${fText('name', 'Template name', k.name, 'required')}${fSel('tripType', 'Kind of trip', LABELS.tripType, k.tripType)}${fArea('summary', 'Who it is for', k.summary)}${fText('author', 'Author (optional)', k.author)}<button class="btn primary">Save</button>`, fd => {
+    k.name = fd.get('name').trim() || k.name; k.tripType = fd.get('tripType'); k.summary = fd.get('summary').trim(); k.author = fd.get('author').trim() || undefined; if (!k.author) delete k.author;
+    touch(plan); save(); render(); toast('Saved');
+  });
+}
 function startPlanDrawer(tid) {
   const t = allTemplates().find(x => x.id === tid);
   if (!t) return;
@@ -886,7 +939,21 @@ document.addEventListener('click', e => {
     case 'add': editItem(list); break;
     case 'edit': editItem(list, id); break;
     case 'hide': { const it = K()[list].find(x => x.id === id); it.hidden = !it.hidden || undefined; if (!it.hidden) delete it.hidden; touch(plan); save(); render(); break; }
-    case 'removeItem': K()[list] = K()[list].filter(x => x.id !== id); touch(plan); save(); closeDrawer(); render(); toast('Removed'); break;
+    case 'removeItem': {
+      if (['phases', 'anchors', 'sources'].includes(list)) {
+        const trial = {...K(), [list]: K()[list].filter(x => x.id !== id)};
+        const used = checkTemplate(trial).filter(m => m.includes(`"${id}"`) || m.includes(`"${id}:end"`));
+        if (used.length) {
+          const [l, iid] = used[0].split(':')[0].split('/'), user = K()[l]?.find(x => x.id === iid);
+          toast(user ? `Still used by the ${EDITORS[l]?.title || l} “${EDITORS[l]?.name ? EDITORS[l].name(user) : iid}”. Change that first.` : `Still in use: ${used[0]}`); return;
+        }
+      }
+      K()[list] = K()[list].filter(x => x.id !== id);
+      if (list === 'anchors' && plan.anchorDates) delete plan.anchorDates[id];
+      touch(plan); save(); closeDrawer(); render(); toast('Removed'); break;
+    }
+    case 'newTemplate': newTemplateDrawer(); break;
+    case 'editMeta': editMetaDrawer(); break;
     case 'toggleHidden': showHidden = !showHidden; render(); break;
     case 'check': case 'dose': {
       const listName = act === 'check' ? 'checks' : 'doses', field = act === 'check' ? 'done' : 'taken';
