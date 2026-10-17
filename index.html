@@ -141,18 +141,17 @@ details.more[open]{display:flex;flex-direction:column;gap:6px}
 .cal-legend span{display:inline-flex;align-items:center;gap:6px}
 .cal-legend i{width:12px;height:12px;border-radius:3px;flex:none}
 .cal-legend i.kd{border-radius:50%;background:none;border:2px solid var(--ink);width:10px;height:10px}
-.cal-month h3{margin:0 0 6px}
-.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
-.cal-grid .dow{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;padding-bottom:2px}
-.cal-day{position:relative;min-height:52px;border:0;border-radius:6px;background:var(--sunk);color:var(--ink);padding:4px 4px 3px;display:flex;flex-direction:column;align-items:stretch;gap:2px;font:inherit;text-align:left;cursor:pointer}
+.cal-months{display:grid;grid-template-columns:repeat(auto-fill,minmax(max(150px,calc((100% - 32px) / 3)),1fr));gap:12px 16px}
+.cal-month h3{margin:0 0 4px;font-size:12px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px}
+.cal-grid .dow{font-size:10px;color:var(--muted);text-align:center}
+.cal-day{border:0;border-radius:3px;background:var(--sunk);color:var(--ink);padding:2px 1px 2px;display:flex;flex-direction:column;align-items:center;gap:1px;font:inherit;cursor:pointer;min-width:0}
 .cal-day.out{background:none;cursor:default}
-.cal-day .n{font-size:12px;font-variant-numeric:tabular-nums;line-height:1.2;display:flex;align-items:center;gap:3px}
-.cal-day.kd .n b{width:8px;height:8px;border-radius:50%;border:2px solid var(--ink);flex:none}
-.cal-day.today{outline:2px solid var(--accent);outline-offset:-2px}
-.cal-day .bars{margin-top:auto;display:flex;flex-direction:column;gap:2px}
-.cal-day .bars i{display:block;height:5px;border-radius:2px}
-.cal-day .kl{font-size:10px;line-height:1.15;color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-@media (min-width:640px){.cal-day{min-height:68px}.cal-day .n{font-size:13px}.cal-day .kl{font-size:11px}}
+.cal-day .n{font-size:11px;font-variant-numeric:tabular-nums;line-height:16px;width:16px;height:16px;text-align:center;border-radius:50%}
+.cal-day.kd .n{box-shadow:inset 0 0 0 1.5px var(--ink);font-weight:600}
+.cal-day.today{outline:2px solid var(--accent);outline-offset:-1px}
+.cal-day .bars{display:flex;flex-direction:column;gap:1px;width:100%;min-height:3px}
+.cal-day .bars i{display:block;height:3px;border-radius:1px}
 :root{--ph-purple:#7b4fc4;--ph-coral:#c8553d}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ph-purple:#b18cf0;--ph-coral:#f08a72}}
 :root[data-theme="dark"]{--ph-purple:#b18cf0;--ph-coral:#f08a72}
@@ -587,7 +586,7 @@ function calendarHtml(plan, phases) {
   const pts = [...placedPh.flatMap(x => [startOfDay(x.w.start), startOfDay(x.w.end)]), ...keys.map(k => k.day)];
   const first = new Date(Math.min(...pts)), last = new Date(Math.max(...pts));
   const today = startOfDay(new Date());
-  const legend = `<div class="cal-legend">${placedPh.map(x => `<span><i class="ph${x.c}"></i>${esc(x.p.name)} <span class="muted">${esc(winDates(x.w))}</span></span>`).join('')}${keys.length ? '<span><i class="kd"></i>Key date</span>' : ''}</div>`;
+  const legend = `<div class="cal-legend">${placedPh.map(x => `<span><i class="ph${x.c}"></i>${esc(x.p.name)} <span class="muted">${esc(winDates(x.w))}</span></span>`).join('')}${keys.map(k => `<span><i class="kd"></i>${esc(k.label)} <span class="muted">${esc(fmtDay(k.day))}</span></span>`).join('')}</div>`;
   const unplaced = phases.filter(x => !x.w).map(x => x.p.name);
   const dows = Array.from({length: 7}, (_, i) => addDays(new Date(2024, 0, 1), i).toLocaleDateString(undefined, {weekday: 'narrow'}));
   const months = [];
@@ -598,11 +597,11 @@ function calendarHtml(plan, phases) {
       const d = new Date(m.getFullYear(), m.getMonth(), n);
       const on = placedPh.filter(x => overlapsDay(x.w, d)), kd = keys.filter(k => +k.day === +d);
       const label = [fmtLong(d), ...on.map(x => x.p.name), ...kd.map(k => k.label)].join('. ');
-      cells.push(`<button class="cal-day${kd.length ? ' kd' : ''}${+d === +today ? ' today' : ''}" data-act="calDay" data-day="${dayStr(d)}" aria-label="${esc(label)}"><span class="n">${kd.length ? '<b></b>' : ''}${n}</span>${kd.length ? `<span class="kl">${esc(kd.map(k => k.label).join(', '))}</span>` : ''}<span class="bars">${on.map(x => `<i class="ph${x.c}" title="${esc(x.p.name)}"></i>`).join('')}</span></button>`);
+      cells.push(`<button class="cal-day${kd.length ? ' kd' : ''}${+d === +today ? ' today' : ''}" data-act="calDay" data-day="${dayStr(d)}" aria-label="${esc(label)}" title="${esc(label)}"><span class="n">${n}</span><span class="bars">${on.map(x => `<i class="ph${x.c}"></i>`).join('')}</span></button>`);
     }
     months.push(`<div class="cal-month"><h3>${esc(m.toLocaleDateString(undefined, {month: 'long', year: 'numeric'}))}</h3><div class="cal-grid">${dows.map(x => `<span class="dow" aria-hidden="true">${esc(x)}</span>`).join('')}${cells.join('')}</div></div>`);
   }
-  return `<div class="panel stack">${legend}${unplaced.length ? `<p class="small muted">Not on the calendar until their key dates are set: ${esc(unplaced.join(', '))}.</p>` : ''}${months.join('')}<p class="small muted">Tap a day to open it in Today.</p></div>`;
+  return `<div class="panel stack">${legend}${unplaced.length ? `<p class="small muted">Not on the calendar until their key dates are set: ${esc(unplaced.join(', '))}.</p>` : ''}<div class="cal-months">${months.join('')}</div><p class="small muted">Tap a day to open it in Today.</p></div>`;
 }
 
 function renderMeds() {
