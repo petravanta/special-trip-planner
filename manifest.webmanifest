@@ -1,0 +1,17 @@
+{
+  "name": "Special Trip Planner",
+  "short_name": "Trip Planner",
+  "description": "Plan a higher-stakes trip (a surgery, a hike, a festival, a conference) from a template written by people who have done it before.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef2f4",
+  "theme_color": "#ffffff",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}
