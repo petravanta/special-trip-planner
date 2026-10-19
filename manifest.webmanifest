@@ -2,7 +2,7 @@
   "name": "Special Trip Planner",
   "short_name": "Trip Planner",
   "description": "Plan a higher-stakes trip (a surgery, a hike, a festival, a conference) from a template written by people who have done it before.",
-  "id": "./",
+  "id": "/special-trip-planner/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
