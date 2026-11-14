@@ -39,3 +39,7 @@ Templates you import stay in your browser. Sensitive templates (a specific clini
 ## Running it
 
 It is a single static file, `index.html`, with no build step. Serve the folder (`python3 -m http.server`) and open it; `data/` can't load from `file://`. GitHub Pages serves it from `main`, root folder.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
